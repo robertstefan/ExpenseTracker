@@ -1,14 +1,20 @@
 #ToDos & Homework#
 
 ## 08.07.2024 ##
-[ ] Implement missing controller methods for `Transactions`
-[ ] Create a new db table `Categories`, in relation w/ `Transactions` & add basic CRUD actions
-[ ] Change implementation from `int` to `enum` for `TransactionType`
+
+[] Implement missing controller methods for `Transactions`
+
+[] Create a new db table `Categories`, in relation w/ `Transactions` & add basic CRUD actions
+
+[] Change implementation from `int` to `enum` for `TransactionType`
+
 -----------------
+
 ###Extra###
 
-[ ] Update `Transactions` to account the `Categories` tbl and retrieve data [sql `joins`]
-[ ] Log the error
+[] Update `Transactions` to account the `Categories` tbl and retrieve data \[sql `joins`\]
+
+[] Log the error
 
 -------------------------------------
 
