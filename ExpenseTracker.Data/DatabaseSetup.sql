@@ -1,0 +1,7 @@
+CREATE TABLE Expenses (
+    Id UNIQUEIDENTIFIER NOT NULL DEFAULT newid(),
+    Description NVARCHAR(255) NOT NULL,
+    Amount DECIMAL(18, 2) NOT NULL,
+    Date DATE NOT NULL,
+    Category NVARCHAR(50) NOT NULL
+)
