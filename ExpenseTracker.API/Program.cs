@@ -15,6 +15,10 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
     new ExpenseRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ExpenseService>();
 
+builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
+    new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<TransactionService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
