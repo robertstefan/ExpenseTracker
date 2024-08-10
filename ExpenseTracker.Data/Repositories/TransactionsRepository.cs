@@ -22,9 +22,18 @@ namespace ExpenseTracker.Data.Repositories
       using var connection = new SqlConnection(_connectionString);
       var query = $@"INSERT INTO {TableName} 
                               (Id, Description, Amount, Date, Category, IsRecurrent, TransactionType)
-                          VALUES (@Id, @Description,@Amount, @Date, @Category, @IsRecurrent, @TransactionType)";
+                          VALUES (@Id, @Description,@Amount, @Date, @Category, @IsRecurrent, @TypeId)";
 
-      await connection.ExecuteAsync(query, transaction);
+      await connection.ExecuteAsync(query, new
+      {
+        transaction.Id,
+        transaction.Description,
+        transaction.Amount,
+        transaction.Date,
+        transaction.Category,
+        transaction.IsRecurrent,
+        TypeId = (int)transaction.Type // Convert enum to int
+      });
 
       return transaction.Id;
     }
@@ -44,7 +53,15 @@ namespace ExpenseTracker.Data.Repositories
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"SELECT * FROM {TableName}";
+      var query = $@"SELECT 
+                      Id, 
+                      Description, 
+                      Amount, 
+                      Date, 
+                      Category, 
+                      IsRecurrent, 
+                      TransactionType AS Type 
+                  FROM {TableName}";
 
       return await conn.QueryAsync<Transaction>(query);
     }
@@ -53,18 +70,35 @@ namespace ExpenseTracker.Data.Repositories
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"SELECT * FROM {TableName} WHERE Id = @Id";
-
+      var query = $@"SELECT 
+                      Id, 
+                      Description, 
+                      Amount, 
+                      Date, 
+                      Category, 
+                      IsRecurrent, 
+                      TransactionType AS Type 
+                  FROM {TableName} 
+                  WHERE Id = @Id";
       return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId });
     }
 
-    public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(int transactionType)
+    public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType type)
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"SELECT * FROM {TableName} WHERE TransactionType = @TransactionType";
+      var query = @$"SELECT 
+                      Id, 
+                      Description, 
+                      Amount, 
+                      Date, 
+                      Category, 
+                      IsRecurrent, 
+                      TransactionType AS Type 
+                  FROM {TableName} 
+                  WHERE TransactionType = @TypeId";
 
-      return await conn.QueryAsync<Transaction>(query, new { TransactionType = transactionType });
+      return await conn.QueryAsync<Transaction>(query, new { TypeId = (int)type });
     }
 
     public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
@@ -78,11 +112,20 @@ namespace ExpenseTracker.Data.Repositories
                                   Date = @Date,
                                   Category = @Category,
                                   IsRecurrent = @IsRecurrent,
-                                  TransactionType = @TransactionType
+                                  TransactionType = @TypeId
                               
                              WHERE Id = @Id";
 
-      var result = await conn.ExecuteAsync(query, transaction);
+      var result = await conn.ExecuteAsync(query, new
+      {
+        transaction.Id,
+        transaction.Description,
+        transaction.Amount,
+        transaction.Date,
+        transaction.Category,
+        transaction.IsRecurrent,
+        TypeId = (int)transaction.Type // Convert enum to int
+      });
 
       if (result == 0)
       {

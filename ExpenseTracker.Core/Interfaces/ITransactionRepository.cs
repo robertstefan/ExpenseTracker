@@ -14,6 +14,6 @@ namespace ExpenseTracker.Core.Interfaces
 
     Task<bool> DeleteTransactionAsync(Guid transactionId);
 
-    Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(int transactionType);
+    Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType type);
   }
 }

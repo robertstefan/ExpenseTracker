@@ -11,8 +11,7 @@
 
     public bool IsRecurrent { get; set; }
 
-    // @TODO - change impl from int to enum
-    public int TransactionType { get; set; }
+    public TransactionType Type { get; set; }
 
     public Transaction()
     {

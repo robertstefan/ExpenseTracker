@@ -40,7 +40,7 @@ namespace ExpenseTracker.API.Controllers
 
     [HttpGet]
     [Route("get-by-type/:type")]
-    public async Task<ActionResult<IEnumerable<Transaction>>> GetByType(int type)
+    public async Task<ActionResult<IEnumerable<Transaction>>> GetByType(TransactionType type)
     {
       return (await _transactionService.GetTransactionsByTypeAsync(type)).ToList();
     }
@@ -80,7 +80,7 @@ namespace ExpenseTracker.API.Controllers
           Date = transactionModel.Date,
           Description = transactionModel.Description,
           IsRecurrent = transactionModel.IsRecurrent,
-          TransactionType = transactionModel.TransactionType,
+          Type = transactionModel.Type,
         });
       }
       catch (Exception ex)
