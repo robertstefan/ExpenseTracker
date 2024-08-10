@@ -16,7 +16,7 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
 builder.Services.AddScoped<ExpenseService>();
 
 builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
-    new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")));
+    new TransactionsRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<TransactionService>();
 
 var app = builder.Build();

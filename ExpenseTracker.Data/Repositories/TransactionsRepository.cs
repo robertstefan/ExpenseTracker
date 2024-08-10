@@ -7,12 +7,12 @@ using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.Data.Repositories
 {
-  public class TransactionsRespository : ITransactionRepository
+  public class TransactionsRepository : ITransactionRepository
   {
     private readonly string _connectionString;
     private string TableName => "[Transactions]";
 
-    public TransactionsRespository(string connectionString)
+    public TransactionsRepository(string connectionString)
     {
       _connectionString = connectionString;
     }
@@ -33,7 +33,7 @@ namespace ExpenseTracker.Data.Repositories
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"DELETE FROM {TableName} WHERE Id = @Id; SELECT @ROWCOUNT AS Affected";
+      var query = $"DELETE FROM {TableName} WHERE Id = @Id; SELECT @@ROWCOUNT AS Affected";
 
       var affectedRows = await conn.ExecuteScalarAsync<int>(query, new { Id = transactionId });
 
@@ -72,15 +72,15 @@ namespace ExpenseTracker.Data.Repositories
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"UPDATE {TableName}
-                              SET (
+                              SET 
                                   Description = @Description,
                                   Amount = @Amount,
                                   Date = @Date,
                                   Category = @Category,
                                   IsRecurrent = @IsRecurrent,
                                   TransactionType = @TransactionType
-                              )
-                          WHERE Id = @Id";
+                              
+                             WHERE Id = @Id";
 
       var result = await conn.ExecuteAsync(query, transaction);
 
