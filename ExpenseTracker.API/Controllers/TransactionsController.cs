@@ -24,6 +24,27 @@ namespace ExpenseTracker.API.Controllers
       return (await _transactionService.GetAllTransactionsAsync()).ToList();
     }
 
+    [HttpGet]
+    [Route(":id")]
+    public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
+    {
+      var transaction = await _transactionService.GetTransactionByIdAsync(id);
+
+      if (transaction == null)
+      {
+        return NotFound();
+      }
+
+      return Ok(transaction);
+    }
+
+    [HttpGet]
+    [Route("get-by-type/:type")]
+    public async Task<ActionResult<IEnumerable<Transaction>>> GetByType(int type)
+    {
+      return (await _transactionService.GetTransactionsByTypeAsync(type)).ToList();
+    }
+
     [HttpPost]
     [Route("create")]
     public async Task<ActionResult<Transaction>> AddTransaction(TransactionDTO transactionModel)
@@ -70,6 +91,39 @@ namespace ExpenseTracker.API.Controllers
 
       return Ok(new IdOnlyResponse() { Id = result});
     }
+
+    [HttpPut]
+    [Route("update")]
+    public async Task<ActionResult<Transaction>> UpdateTransaction(Transaction transaction)
+    {
+      if(transaction == null)
+      {
+        return BadRequest();
+      }
+
+      
+      var updated = await _transactionService.UpdateTransactionAsync(transaction);
+      // Repo returns null if no transaction is found
+      if (updated == null)
+      {
+        return NotFound();
+      }
+      return Ok(updated);
+    }
+
+    [HttpDelete]
+    [Route("delete/:id")]
+    public async Task<IActionResult> DeleteTransaction(Guid Id)
+    {
+      var succes = await _transactionService.DeleteTransactionAsync(Id);
+      if(!succes)
+      {
+        return NotFound();
+      }
+
+      return Ok();
+    }
+
 
   }
 }
