@@ -68,7 +68,8 @@ namespace ExpenseTracker.API.Controllers
         return BadRequest("Could not register the transaction");
       }
 
-      return Ok(result);
+      return Ok(new IdOnlyResponse() { Id = result});
     }
+
   }
 }
