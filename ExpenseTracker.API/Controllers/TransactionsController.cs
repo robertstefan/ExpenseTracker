@@ -27,9 +27,10 @@ namespace ExpenseTracker.API.Controllers
     [HttpGet]
     [Route(":id")]
     public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
-    {
+    {      
       var transaction = await _transactionService.GetTransactionByIdAsync(id);
 
+      // @TODO: this doesn't work
       if (transaction == null)
       {
         return NotFound();

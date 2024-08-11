@@ -2,6 +2,6 @@
 {
   public class IdOnlyResponse
   {
-    public Guid Id { get; set; }
+    public Object Id { get; set; }
   }
 }
