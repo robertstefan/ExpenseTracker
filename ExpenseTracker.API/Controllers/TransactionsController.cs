@@ -60,11 +60,6 @@ namespace ExpenseTracker.API.Controllers
         return BadRequest("Amount cannot be less or equal to 0");
       }
 
-      if (string.IsNullOrEmpty(transactionModel.Category))
-      {
-        transactionModel.Category = "Diverse";
-      }
-
       if (transactionModel.Date <= DateTime.MinValue)
       {
         return BadRequest($"Date cannot be lower than ${DateTime.MinValue.Date.ToShortDateString()}");
@@ -77,7 +72,7 @@ namespace ExpenseTracker.API.Controllers
         result = await _transactionService.AddTransactionAsync(new Transaction()
         {
           Amount = transactionModel.Amount,
-          Category = transactionModel.Category,
+          CategoryId = transactionModel.CategoryId,
           Date = transactionModel.Date,
           Description = transactionModel.Description,
           IsRecurrent = transactionModel.IsRecurrent,
@@ -87,6 +82,7 @@ namespace ExpenseTracker.API.Controllers
       catch (Exception ex)
       {
         // @TODO - LOG THE ERROR
+        Console.WriteLine(ex);
         return BadRequest("Could not register the transaction");
       }
 

@@ -8,11 +8,11 @@ namespace ExpenseTracker.Core.Validation
   {
     protected override ValidationResult IsValid(object value, ValidationContext validationContext)
     {
-      if (value is int intValue && Enum.IsDefined(typeof(TransactionType), intValue))
+      int intValue = (int)value;
+      if (Enum.IsDefined(typeof(TransactionType), intValue))
       {
         return ValidationResult.Success!;
       }
-
       return new ValidationResult("Invalid transaction type.");
     }
   }
