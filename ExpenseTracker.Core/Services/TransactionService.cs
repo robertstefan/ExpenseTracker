@@ -22,9 +22,9 @@ namespace ExpenseTracker.Core.Services
       return await _transactionRepository.GetTransactionByIdAsync(transactionId);
     }
 
-    public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
+    public async Task<IEnumerable<Transaction>> GetTransactionsPaginatedAsync(int offset, int limit)
     {
-      return await _transactionRepository.GetAllTransactionsAsync();
+      return await _transactionRepository.GetTransactionsPaginatedAsync(offset, limit);
     }
 
     public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)

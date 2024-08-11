@@ -1,25 +1,23 @@
-# ToDos & Homework #
+## 08.07.2024
 
-## 08.07.2024 ##
+- [x] Implement missing controller methods for `Transactions`
+- [x] Create a new db table `Categories`, in relation w/ `Transactions` & add basic CRUD actions
+- [x] Change implementation from `int` to `enum` for `TransactionType`
 
-- [ ] Implement missing controller methods for `Transactions`
-- [ ] Create a new db table `Categories`, in relation w/ `Transactions` & add basic CRUD actions
-- [ ] Change implementation from `int` to `enum` for `TransactionType`
+---
 
------------------
+### Extra
 
-### Extra ###
+- [x] Update `Transactions` to account the `Categories` tbl and retrieve data \[sql `joins`\]
+- [x] Log the error
 
-- [ ] Update `Transactions` to account the `Categories` tbl and retrieve data \[sql `joins`\]
-- [ ] Log the error
-
--------------------------------------
+---
 
 - Add `Category` support for child records
-	- create SP with tree struct
-- Soft delete
-- Pagination
+  - create SP with tree struct
+- [x] Soft delete
+- [x] Pagination
 - Implement multiple `ExpenseType` [income, expense, transfer]
 - Give possibility to view reports in a date range
 - Add support for user records
-	- Auth with token
+  - Auth with token

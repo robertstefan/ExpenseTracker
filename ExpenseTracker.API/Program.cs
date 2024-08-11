@@ -4,6 +4,9 @@ using ExpenseTracker.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -11,21 +14,25 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
-    new ExpenseRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<ExpenseService>();
-
 builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
-    new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")));
+    new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")!));
 builder.Services.AddScoped<TransactionService>();
+
+builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>(sp =>
+    new CategoriesRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
+builder.Services.AddScoped<CategoryService>();
+
+builder.Services.AddScoped<IRaportRepository, RaportRepository>(sp =>
+    new RaportRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
+builder.Services.AddScoped<RaportService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

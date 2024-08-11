@@ -7,53 +7,104 @@ using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.Data.Repositories
 {
-  public class TransactionsRespository : ITransactionRepository
+  public class TransactionsRespository(string _connectionString) : ITransactionRepository
   {
-    private readonly string _connectionString;
-    private string TableName => "[Transactions]";
-
-    public TransactionsRespository(string connectionString)
-    {
-      _connectionString = connectionString;
-    }
+    private static string TableName => "[Transactions]";
 
     public async Task<Guid> AddTransactionAsync(Transaction transaction)
     {
       using var connection = new SqlConnection(_connectionString);
-      var query = $@"INSERT INTO {TableName} 
-                              (Id, Description, Amount, Date, Category, IsRecurrent, TransactionType)
-                          VALUES (@Id, @Description,@Amount, @Date, @Category, @IsRecurrent, @TransactionType)";
+      try
+      {
+        var createTransactionQuery = $@"
+            IF EXISTS (
+                SELECT 1 
+                FROM [Categories] 
+                WHERE IsDeleted = 0 
+                AND Id = @CategoryId
+            )
+            BEGIN
+                INSERT INTO {TableName} 
+                (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType, CreatedDateTime, UpdatedDateTime)
+                VALUES 
+                (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @TransactionType, GETDATE(), GETDATE())
+            END";
 
-      await connection.ExecuteAsync(query, transaction);
+        int affectedRows = await connection.ExecuteAsync(createTransactionQuery, transaction);
 
-      return transaction.Id;
+        if (affectedRows > 0)
+        {
+          return transaction.Id;
+        }
+
+        return Guid.Empty;
+
+      }
+      catch (Exception ex)
+      {
+        return Guid.Empty;
+      }
     }
 
     public async Task<bool> DeleteTransactionAsync(Guid transactionId)
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"DELETE FROM {TableName} WHERE Id = @Id; SELECT @ROWCOUNT AS Affected";
+      var query = $"DELETE FROM {TableName} WHERE Id = @Id;";
 
-      var affectedRows = await conn.ExecuteScalarAsync<int>(query, new { Id = transactionId });
+      var affectedRows = await conn.ExecuteAsync(query, new { Id = transactionId });
 
       return affectedRows == 1;
     }
 
-    public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
+    public async Task<IEnumerable<Transaction>> GetTransactionsPaginatedAsync(int offset, int limit)
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"SELECT * FROM {TableName}";
+      var query = @$"SELECT 
+                      t.Id,
+                      t.Description,
+                      t.Amount,
+                      t.Date,
+                      t.IsRecurrent,
+                      t.TransactionType,
+                      t.CreatedDateTime,
+                      t.UpdatedDateTime,
+                      c.Name as CategoryName
+                    FROM 
+                      {TableName} t
+                    INNER JOIN
+                      Categories c ON t.CategoryId = c.Id
+                    ORDER BY
+                    Id
+                    ASC
+                    OFFSET @Offset Rows
+                    FETCH NEXT @Limit
+                    ROWS ONLY";
 
-      return await conn.QueryAsync<Transaction>(query);
+      return await conn.QueryAsync<Transaction>(query, new { Offset = offset, Limit = limit });
     }
 
     public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = $"SELECT * FROM {TableName} WHERE Id = @Id";
+      var query = @$"SELECT 
+                      t.Id as TransactionId,
+                      t.Description,
+                      t.Amount,
+                      t.Date,
+                      t.IsRecurrent,
+                      t.TransactionType,
+                      t.CreatedDateTime,
+                      t.UpdatedDateTime,
+                      c.Name as CategoryName
+                    FROM 
+                      {TableName} t
+                    INNER JOIN
+                      Categories c ON t.CategoryId = c.Id
+                    WHERE
+                      t.Id = @Id";
 
       return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId });
     }
@@ -72,15 +123,15 @@ namespace ExpenseTracker.Data.Repositories
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"UPDATE {TableName}
-                              SET (
-                                  Description = @Description,
-                                  Amount = @Amount,
-                                  Date = @Date,
-                                  Category = @Category,
-                                  IsRecurrent = @IsRecurrent,
-                                  TransactionType = @TransactionType
-                              )
-                          WHERE Id = @Id";
+               SET 
+                   Description = @Description,
+                   Amount = @Amount,
+                   Date = @Date,
+                   CategoryId = @CategoryId,
+                   IsRecurrent = @IsRecurrent,
+                   TransactionType = @TransactionType,
+                   UpdatedDateTime = GETDATE()
+               WHERE Id = @Id";
 
       var result = await conn.ExecuteAsync(query, transaction);
 
