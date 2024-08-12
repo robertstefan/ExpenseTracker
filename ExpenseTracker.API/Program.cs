@@ -13,11 +13,19 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
     new ExpenseRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// @TODO: 2 interfaces??
+builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
+    new TransactionsRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(sp =>
+    new CategoryRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+
+builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<CategoryService>();
 builder.Services.AddScoped<ExpenseService>();
 
-builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
-    new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<TransactionService>();
 
 var app = builder.Build();
 

@@ -37,9 +37,9 @@ namespace ExpenseTracker.Core.Services
       return await _transactionRepository.DeleteTransactionAsync(transactionId);
     }
 
-    public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(int transactionType)
+    public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType type)
     {
-      return await _transactionRepository.GetTransactionsByTypeAsync(transactionType);
+      return await _transactionRepository.GetTransactionsByTypeAsync(type);
     }
   }
 }
