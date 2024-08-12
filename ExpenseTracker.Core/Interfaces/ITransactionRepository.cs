@@ -8,9 +8,9 @@ namespace ExpenseTracker.Core.Interfaces
 
     Task<Transaction> GetTransactionByIdAsync(Guid transactionId);
 
-    Task<IEnumerable<Transaction>> GetAllTransactionsAsync();
+    Task<IEnumerable<Transaction>> GetTransactionsPaginatedAsync(int offset, int limit);
 
-    Task<Transaction?> UpdateTransactionAsync(Transaction transaction);
+    Task<Transaction> UpdateTransactionAsync(Transaction transaction);
 
     Task<bool> DeleteTransactionAsync(Guid transactionId);
 
