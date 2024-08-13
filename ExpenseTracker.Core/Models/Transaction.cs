@@ -16,8 +16,10 @@ public class Transaction
   public DateTimeOffset UpdatedDateTime { get; private set; }
   public bool IsDeleted { get; private set; }
 
-  [NotMapped]
-  public string CategoryName { get; set; }
+  //[NotMapped]
+  //public string CategoryName { get; set; }
+
+  public Category? Category { get; set; }
 
   private Transaction()
   {

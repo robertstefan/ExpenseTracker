@@ -1,5 +1,4 @@
-﻿using ExpenseTracker.Core.Common.Enums;
-using ExpenseTracker.Core.Models;
+﻿using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.API.DTOs;
 
@@ -14,7 +13,7 @@ public class TransactionDTO
 
   public bool IsRecurrent { get; set; }
 
-  public string CategoryName { get; set; }
+  public Guid CategoryId { get; set; }
 
   public string TransactionType { get; set; }
 
@@ -33,7 +32,7 @@ public class TransactionDTO
     Date = transaction.Date;
     Amount = transaction.Amount;
     IsRecurrent = transaction.IsRecurrent;
-    CategoryName = transaction.CategoryName;
+    CategoryId = transaction.CategoryId;
     TransactionType = transaction.TransactionType.ToString();
     CreatedDateTime = transaction.CreatedDateTime;
     UpdatedDateTime = transaction.UpdatedDateTime;
