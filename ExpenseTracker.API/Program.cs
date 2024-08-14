@@ -11,21 +11,20 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
-    new ExpenseRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<ExpenseService>();
-
-builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
+builder.Services.AddScoped<ITransactionsRepository, ITransactionsRepository>(sp =>
     new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<TransactionService>();
+builder.Services.AddScoped<ICategoriesRepository, ICategoriesRepository>(sp =>
+    new CategoriesRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<TransactionsService>();
+builder.Services.AddScoped<CategoriesService>();
 
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-  app.UseSwagger();
-  app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();

@@ -1,11 +1,10 @@
-﻿using System.Text.Json.Serialization;
+﻿using ExpenseTracker.Core.Models;
+using System.Text.Json.Serialization;
 
-namespace ExpenseTracker.Core.Models
+namespace ExpenseTracker.API.DTOs.Transactions
 {
-    public class Transaction
+    public class TransactionDTO
     {
-        public Guid Id { get; set; } = Guid.NewGuid();
-
         public string Description { get; set; } = string.Empty;
 
         public decimal Amount { get; set; }
@@ -17,6 +16,6 @@ namespace ExpenseTracker.Core.Models
         [JsonConverter(typeof(JsonStringEnumConverter))]
         public TransactionType TransactionType { get; set; }
 
-        public Guid CategoryId { get; set; }
+        public string CategoryName { get; set; } = string.Empty;
     }
 }

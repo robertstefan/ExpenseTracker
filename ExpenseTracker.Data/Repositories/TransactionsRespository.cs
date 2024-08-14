@@ -7,89 +7,97 @@ using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.Data.Repositories
 {
-  public class TransactionsRespository : ITransactionRepository
-  {
-    private readonly string _connectionString;
-    private string TableName => "[Transactions]";
-
-    public TransactionsRespository(string connectionString)
+    public class TransactionsRespository : ITransactionsRepository
     {
-      _connectionString = connectionString;
-    }
+        private readonly string _connectionString;
+        private static string TableName => "[Transactions]";
 
-    public async Task<Guid> AddTransactionAsync(Transaction transaction)
-    {
-      using var connection = new SqlConnection(_connectionString);
-      var query = $@"INSERT INTO {TableName} 
-                              (Id, Description, Amount, Date, Category, IsRecurrent, TransactionType)
-                          VALUES (@Id, @Description,@Amount, @Date, @Category, @IsRecurrent, @TransactionType)";
+        public TransactionsRespository(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
-      await connection.ExecuteAsync(query, transaction);
+        public async Task<Guid> CreateTransactionAsync(Transaction transaction)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var query = $@"INSERT INTO {TableName} 
+                              (Id, Description, Amount, Date, IsRecurrent, TransactionType, CategoryId)
+                          VALUES (@Id, @Description,@Amount, @Date, @IsRecurrent, @TransactionType, @CategoryId)";
 
-      return transaction.Id;
-    }
+            await connection.ExecuteAsync(query, transaction);
 
-    public async Task<bool> DeleteTransactionAsync(Guid transactionId)
-    {
-      using var conn = new SqlConnection(_connectionString);
+            return transaction.Id;
+        }
 
-      var query = $"DELETE FROM {TableName} WHERE Id = @Id; SELECT @ROWCOUNT AS Affected";
+        public async Task<bool> DeleteTransactionAsync(Guid transactionId)
+        {
+            using var conn = new SqlConnection(_connectionString);
 
-      var affectedRows = await conn.ExecuteScalarAsync<int>(query, new { Id = transactionId });
+            var query = $"DELETE FROM {TableName} WHERE Id = @Id;";
 
-      return affectedRows == 1;
-    }
+            var affectedRows = await conn.ExecuteAsync(query, new { Id = transactionId });
 
-    public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
-    {
-      using var conn = new SqlConnection(_connectionString);
+            return affectedRows == 1;
+        }
 
-      var query = $"SELECT * FROM {TableName}";
+        public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
+        {
+            using var conn = new SqlConnection(_connectionString);
 
-      return await conn.QueryAsync<Transaction>(query);
-    }
+            var query = $"SELECT * FROM {TableName}";
 
-    public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
-    {
-      using var conn = new SqlConnection(_connectionString);
+            return await conn.QueryAsync<Transaction>(query);
+        }
 
-      var query = $"SELECT * FROM {TableName} WHERE Id = @Id";
+        public async Task<Transaction> GetTransactionByIdAndCategoryIdAsync(Guid transactionId, Guid categoryId)
+        {
+            using var conn = new SqlConnection(_connectionString);
 
-      return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId });
-    }
+            var query = $"SELECT * FROM {TableName} WHERE Id = @Id AND CategoryId = @CategoryId";
 
-    public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(int transactionType)
-    {
-      using var conn = new SqlConnection(_connectionString);
+            return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId, CategoryId = categoryId });
+        }
 
-      var query = $"SELECT * FROM {TableName} WHERE TransactionType = @TransactionType";
+        public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType)
+        {
+            using var conn = new SqlConnection(_connectionString);
 
-      return await conn.QueryAsync<Transaction>(query, new { TransactionType = transactionType });
-    }
+            var query = $"SELECT * FROM {TableName} WHERE TransactionType = @TransactionType";
 
-    public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
-    {
-      using var conn = new SqlConnection(_connectionString);
+            return await conn.QueryAsync<Transaction>(query, new { TransactionType = transactionType });
+        }
 
-      var query = $@"UPDATE {TableName}
-                              SET (
+        public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = $@"UPDATE {TableName}
+                              SET 
                                   Description = @Description,
                                   Amount = @Amount,
                                   Date = @Date,
-                                  Category = @Category,
                                   IsRecurrent = @IsRecurrent,
                                   TransactionType = @TransactionType
-                              )
+                              
                           WHERE Id = @Id";
 
-      var result = await conn.ExecuteAsync(query, transaction);
+            var result = await conn.ExecuteAsync(query, transaction);
 
-      if (result == 0)
-      {
-        return null;
-      }
+            if (result == 0)
+            {
+                return null;
+            }
 
-      return transaction;
+            return transaction;
+        }
+
+        public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = $"SELECT * FROM {TableName} WHERE Id = @Id";
+
+            return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId });
+        }
     }
-  }
 }
