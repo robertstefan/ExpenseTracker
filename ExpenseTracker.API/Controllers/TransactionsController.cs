@@ -1,89 +1,112 @@
-﻿using ExpenseTracker.API.DTOs;
+﻿using ExpenseTracker.API.Common.Extensions;
+using ExpenseTracker.API.Common.Options;
+using ExpenseTracker.API.Common.Pagination;
+using ExpenseTracker.API.DTOs;
+using ExpenseTracker.API.Requests.Common;
 using ExpenseTracker.API.Requests.Transactions;
 using ExpenseTracker.Core.Common.Enums;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace ExpenseTracker.API.Controllers;
 
-[Route("api/transactions")]
+[Route("api/[controller]")]
 [ApiController]
-public class TransactionsController(TransactionService _transactionService, ILogger<TransactionsController> _logger) : ControllerBase
+public class TransactionsController : ControllerBase
 {
-  [HttpGet("list")]
-  public async Task<ActionResult<List<Transaction>>> GetTransactionsPaginated([FromQuery] int offset = 0, [FromQuery] int limit = 10)
+  private readonly TransactionService _transactionService;
+  private readonly SoftDeleteSettings _softDeleteSettings;
+  public TransactionsController(TransactionService transactionService, IOptions<SoftDeleteSettings> softDeleteSettings)
   {
-    List<Transaction> transactions = (await _transactionService.GetTransactionsPaginatedAsync(offset, limit)).ToList();
+    _transactionService = transactionService;
+    _softDeleteSettings = softDeleteSettings.Value;
+  }
+  [HttpGet("list")]
+  public async Task<ActionResult<Paged<TransactionDTO>>> GetTransactionsPaginated([FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10)
+  {
+    var transactions = await _transactionService.GetTransactionsPaginatedAsync(PageNumber, PageSize);
 
     if (transactions == null)
     {
       return Ok(Enumerable.Empty<Transaction>());
     }
 
-    return Ok(transactions.Select(transaction => new TransactionDTO(transaction)).ToList());
+    return new Paged<TransactionDTO>(transactions.TotalCount, PageNumber, PageSize)
+    {
+      Items = transactions.Rows.Select(t => new TransactionDTO(t)).ToList(),
+      TotalItems = transactions.TotalCount,
+    };
+
   }
 
   [HttpGet("{id}")]
   public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
   {
+    if (id.IsEmpty())
+    {
+      return BadRequest("The id could not be null");
+    }
     try
     {
       var transaction = await _transactionService.GetTransactionByIdAsync(id);
 
       if (transaction == null)
       {
-        return NotFound();
+        Log.Error("Could not retrieve the transaction with the id {id}", id);
+        return NotFound("No transactions with the associated id were found.");
       }
 
       return Ok(new TransactionDTO(transaction));
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.Message);
+      Log.Fatal("Could not retrieve the transaction with the id {id}", id, ex);
 
-      return BadRequest($"Could not retrieve the transaction with the id {id}");
+      return BadRequest("The transaction could not be retrieved");
     }
   }
 
   [HttpPost]
   public async Task<ActionResult<Transaction>> AddTransaction(CreateTransactionRequest transactionModel)
   {
-    if (transactionModel == null)
+    var validationErrors = transactionModel.GetValidationErrors();
+
+    if (validationErrors.Count != 0)
     {
-      return BadRequest();
-
+      return BadRequest(new { Errors = validationErrors });
     }
-
-    if (transactionModel.Amount <= 0)
-    {
-      return BadRequest("Amount cannot be less or equal to 0");
-    }
-
-    if (transactionModel.Date <= DateTime.MinValue)
-    {
-      return BadRequest($"Date cannot be lower than {DateTime.MinValue.Date.ToShortDateString()}");
-    }
-
-    TransactionType transactionTypeEnum = CastStringToTransactionType(transactionModel.TransactionType);
 
     try
     {
+      TransactionType transactionTypeEnum = IntToEnum.Handle<TransactionType>(transactionModel.TransactionType)!.Value;
+
       var transaction = Transaction.CreateNew(
         transactionModel.Description,
         transactionModel.Amount,
         transactionModel.Date,
         transactionModel.CategoryId,
+        transactionModel.SubcategoryId,
         transactionModel.IsRecurrent,
         transactionTypeEnum
       );
       Guid result = await _transactionService.AddTransactionAsync(transaction);
 
+      if (result == Guid.Empty)
+      {
+        Log.Error("The transaction could not be created.");
+        return NoContent();
+      }
+
+      Log.Information("The transaction was created.");
+
       return Ok(result);
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.Message);
+      Log.Fatal(ex, "The transaction could not be created.");
       return BadRequest("Could not register the transaction");
     }
 
@@ -92,32 +115,45 @@ public class TransactionsController(TransactionService _transactionService, ILog
   [HttpPut("{id}")]
   public async Task<ActionResult<Transaction>> UpdateTransaction(Guid id, UpdateTransactionRequest request)
   {
-    if (id != request.Id)
+    if (id.IsEmpty())
     {
-      return BadRequest();
+      return BadRequest("The id could not be null");
     }
+    var validationErrors = request.GetValidationErrors();
 
+    if (validationErrors.Count != 0)
+    {
+      return BadRequest(new { Errors = validationErrors });
+    }
     try
     {
-      TransactionType transactionTypeEnum = CastStringToTransactionType(request.TransactionType);
-
+      TransactionType transactionTypeEnum = IntToEnum.Handle<TransactionType>(request.TransactionType)!.Value;
       var transaction = Transaction.Create(
-        request.Id,
+        id,
         request.Description,
         request.Amount,
         request.Date,
         request.CategoryId,
+        request.SubcategoryId,
         request.IsRecurrent,
         transactionTypeEnum
       );
 
-      var result = await _transactionService.UpdateTransactionAsync(transaction);
+      var updateSuccess = await _transactionService.UpdateTransactionAsync(transaction);
 
-      return Ok(result);
+      if (updateSuccess)
+      {
+        Log.Information("The transaction was updated.");
+        return Ok();
+      }
+
+      Log.Error("The transaction with the id {id} could not be updated");
+
+      return NoContent();
     }
     catch (Exception ex)
     {
-      _logger.LogError(ex.Message);
+      Log.Fatal("The transaction with the id {id} could not be updated", id, ex);
       return BadRequest("Could not update the transaction");
     }
   }
@@ -125,19 +161,30 @@ public class TransactionsController(TransactionService _transactionService, ILog
   [HttpDelete("{id}")]
   public async Task<ActionResult<Transaction>> DeleteTransaction(Guid id)
   {
-    await _transactionService.DeleteTransactionAsync(id);
-
-    return NoContent();
-  }
-
-  private static TransactionType CastStringToTransactionType(string transactionType)
-  {
-
-    if (!Enum.TryParse(transactionType.Trim(), true, out TransactionType transactionTypeEnum))
+    if (id.IsEmpty())
     {
-      transactionTypeEnum = TransactionType.Expense;
+      return BadRequest("The id could not be empty.");
     }
-    return transactionTypeEnum;
+    try
+    {
+      var softDelete = _softDeleteSettings.SoftDelete;
+      var deleteSuccess = await _transactionService.DeleteTransactionAsync(id, softDelete);
+
+      if (deleteSuccess)
+      {
+        Log.Information("The transaction with the id {id} was deleted", id);
+
+        return Ok();
+      }
+      Log.Error("The transaction with the id {id} could not be deleted", id);
+
+      return NoContent();
+    }
+    catch (Exception ex)
+    {
+      Log.Fatal("The transaction with the id {id} could not be deleted", id, ex);
+      return BadRequest("The transaction could not be deleted");
+    }
   }
 }
 

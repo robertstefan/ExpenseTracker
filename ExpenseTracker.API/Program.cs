@@ -1,44 +1,50 @@
-using ExpenseTracker.Core.Interfaces;
-using ExpenseTracker.Core.Services;
-using ExpenseTracker.Data.Repositories;
+using ExpenseTracker.API.Configuration;
+using ExpenseTracker.Core.Configuration;
+using ExpenseTracker.Data.Configuration;
+using Serilog;
 
-var builder = WebApplication.CreateBuilder(args);
+var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
 
-builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
-    new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")!));
-builder.Services.AddScoped<TransactionService>();
-
-builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>(sp =>
-    new CategoriesRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
-builder.Services.AddScoped<CategoryService>();
-
-builder.Services.AddScoped<IRaportRepository, RaportRepository>(sp =>
-    new RaportRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
-builder.Services.AddScoped<RaportService>();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+try
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    Log.Information("Expense Tracker is starting up.");
+
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Logging.ClearProviders();
+
+    builder.Host.UseSerilog();
+
+    builder.Services
+    .AddData(builder.Configuration)
+    .AddCore()
+    .AddPresentation(builder.Configuration);
+
+    var app = builder.Build();
+
+    if (app.Environment.IsDevelopment())
+    {
+        app.UseSwagger();
+        app.UseSwaggerUI();
+    }
+
+    app.UseSerilogRequestLogging();
+
+    app.UseHttpsRedirection();
+
+    app.UseAuthorization();
+
+    app.MapControllers();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Expense Tracker failed to start up.");
+}
+finally
+{
+    Log.CloseAndFlush();
+}

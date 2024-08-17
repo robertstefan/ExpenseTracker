@@ -1,7 +1,10 @@
 using System.Data.SqlClient;
 using Dapper;
+using ExpenseTracker.Core.Common.Pagination;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
+using ExpenseTracker.Data.Common.SharedMethods;
+using static ExpenseTracker.Core.Common.Pagination.PagedMethods;
 
 namespace ExpenseTracker.Data.Repositories;
 
@@ -20,21 +23,27 @@ public class CategoriesRepository(string _connectionString) : ICategoriesReposit
         return category.Id;
     }
 
-    public async Task<bool> DeleteCategoryAsync(Guid id)
+    public async Task<bool> DeleteCategoryAsync(Guid id, bool SoftDelete)
     {
-        using var connection = new SqlConnection(_connectionString);
-        string sql = @$"UPDATE {TableName}
-                        SET
-                        IsDeleted = 1
-                        WHERE Id = @Id";
-        int affectedRows = await connection.ExecuteAsync(sql, new { Id = id });
+        using var conn = new SqlConnection(_connectionString);
+
+        int affectedRows = await ToggleDelete.Handle(id, "Categories", conn, SoftDelete);
+
         return affectedRows == 1;
     }
 
-    public async Task<IEnumerable<Category>> GetCategoriesPaginatedAsync(int offset, int limit)
+    public async Task<PaginatedResponse<Category>> GetCategoriesPaginatedAsync(int PageNumber, int PageSize)
     {
         using var connection = new SqlConnection(_connectionString);
-        string sql = $@"SELECT 
+
+        int Offset = OffsetMethods.GetOffsetByPageSize(PageNumber, PageSize);
+
+        string sql = $@"
+                        SELECT Count(0) [Count]
+                        FROM {TableName}
+                        WHERE IsDeleted = 0
+
+                        SELECT 
                         * 
                         FROM {TableName} 
                         WHERE 
@@ -43,13 +52,24 @@ public class CategoriesRepository(string _connectionString) : ICategoriesReposit
                         Id 
                         ASC 
                         OFFSET @Offset ROWS 
-                        FETCH NEXT @Limit 
+                        FETCH NEXT @PageSize 
                         ROWS ONLY";
-        return await connection.QueryAsync<Category>(sql, new { Offset = offset, Limit = limit });
+
+        var multi = await connection.QueryMultipleAsync(sql, new { Offset, PageSize });
+
+        var totalCount = multi.Read<int>().Single();
+
+        var items = multi.Read<Category>().ToList();
+
+        return new PaginatedResponse<Category>
+        {
+            TotalCount = totalCount,
+            Rows = items
+        };
 
     }
 
-    public async Task<Category> GetCategoryByIdAsync(string id)
+    public async Task<Category?> GetCategoryByIdAsync(Guid id)
     {
         using var connection = new SqlConnection(_connectionString);
         string sql = @$"SELECT
@@ -59,7 +79,7 @@ public class CategoriesRepository(string _connectionString) : ICategoriesReposit
                         Id = @Id 
                         AND 
                         IsDeleted = 0";
-        return await connection.QueryFirstAsync<Category>(sql, new { Id = id });
+        return await connection.QueryFirstOrDefaultAsync<Category>(sql, new { Id = id });
     }
 
     public async Task<bool> UpdateCategoryAsync(Category category)

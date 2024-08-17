@@ -13,7 +13,13 @@
 
 ---
 
-- Add `Category` support for child records
+## 08.12.2024 ##
+
+- [x] Add `Category` support for child records w/ C.R.U.D. operations
+- [x] Add info to `Transactions`
+- -------
+
+
   - create SP with tree struct
 - [x] Soft delete
 - [x] Pagination

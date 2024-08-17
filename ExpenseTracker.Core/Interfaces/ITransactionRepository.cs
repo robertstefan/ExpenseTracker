@@ -1,19 +1,20 @@
-﻿using ExpenseTracker.Core.Models;
+﻿using ExpenseTracker.Core.Common.Pagination;
+using ExpenseTracker.Core.Models;
 
-namespace ExpenseTracker.Core.Interfaces
+namespace ExpenseTracker.Core.Interfaces;
+
+public interface ITransactionRepository
 {
-  public interface ITransactionRepository
-  {
-    Task<Guid> AddTransactionAsync(Transaction transaction);
+  Task<Guid> AddTransactionAsync(Transaction transaction);
 
-    Task<Transaction> GetTransactionByIdAsync(Guid transactionId);
+  Task<Transaction> GetTransactionByIdAsync(Guid transactionId);
 
-    Task<IEnumerable<Transaction>> GetTransactionsPaginatedAsync(int offset, int limit);
+  Task<PaginatedResponse<Transaction>?> GetTransactionsPaginatedAsync(int PageNumber, int PageSize);
 
-    Task<Transaction> UpdateTransactionAsync(Transaction transaction);
+  Task<bool> UpdateTransactionAsync(Transaction transaction);
 
-    Task<bool> DeleteTransactionAsync(Guid transactionId);
+  Task<bool> DeleteTransactionAsync(Guid transactionId, bool SoftDelete);
 
-    Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(int transactionType);
-  }
+  Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(int transactionType);
 }
+

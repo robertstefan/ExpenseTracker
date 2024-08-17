@@ -1,3 +1,4 @@
+using ExpenseTracker.Core.Common.Pagination;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
@@ -10,23 +11,23 @@ public class CategoryService(ICategoriesRepository _categoryRepository)
         return await _categoryRepository.AddCategoryAsync(category);
     }
 
-    public async Task<IEnumerable<Category>> GetCategoriesPaginatedAsync(int offset, int limit)
+    public async Task<PaginatedResponse<Category>> GetCategoriesPaginatedAsync(int PageNumber, int PageSize)
     {
-        return await _categoryRepository.GetCategoriesPaginatedAsync(offset, limit);
+        return await _categoryRepository.GetCategoriesPaginatedAsync(PageNumber, PageSize);
     }
 
-    public async Task<Category> GetCategoryByIdAsync(string id)
+    public async Task<Category?> GetCategoryByIdAsync(Guid id)
     {
         return await _categoryRepository.GetCategoryByIdAsync(id);
     }
 
-    public async Task UpdateCategoryAsync(Category expense)
+    public async Task<bool> UpdateCategoryAsync(Category expense)
     {
-        await _categoryRepository.UpdateCategoryAsync(expense);
+        return await _categoryRepository.UpdateCategoryAsync(expense);
     }
 
-    public async Task DeleteCategoryAsync(Guid id)
+    public async Task<bool> DeleteCategoryAsync(Guid id, bool SoftDelete)
     {
-        await _categoryRepository.DeleteCategoryAsync(id);
+        return await _categoryRepository.DeleteCategoryAsync(id, SoftDelete);
     }
 }

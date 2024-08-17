@@ -1,102 +1,174 @@
+using ExpenseTracker.API.Common.Extensions;
+using ExpenseTracker.API.Common.Options;
+using ExpenseTracker.API.Common.Pagination;
 using ExpenseTracker.API.DTOs;
 using ExpenseTracker.API.Requests.Categories;
+using ExpenseTracker.Core.Common.Pagination;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
+using Serilog;
 
 namespace ExpenseTracker.API.Controllers;
 
 [ApiController]
-[Route("api/categories")]
-public class CategoriesController(CategoryService _categoryService, ILogger<CategoriesController> _logger) : ControllerBase
+[Route("api/[controller]")]
+public class CategoriesController : ControllerBase
 {
-    [HttpPost]
-    public async Task<ActionResult<Category>> CreateCategory(CreateCategoryRequest request)
+    private readonly CategoryService _categoryService;
+    private readonly SoftDeleteSettings _softDeleteSettings;
+
+    public CategoriesController(CategoryService categoryService, IOptions<SoftDeleteSettings> softDeleteSettings)
     {
-        var category = Category.CreateNew(
-            request.Name
-        );
+        _categoryService = categoryService;
+        _softDeleteSettings = softDeleteSettings.Value;
+    }
+    [HttpPost]
+    public async Task<ActionResult<Guid>> CreateCategoryAsync(CreateCategoryRequest request)
+    {
+        var validationErrors = request.GetValidationErrors();
+
+        if (validationErrors.Count != 0)
+        {
+            return BadRequest(new { Errors = validationErrors });
+        }
 
         try
         {
-            var result = await _categoryService.AddCategoryAsync(category);
+            var category = Category.CreateNew(
+            request.Name
+        );
 
-            return Ok(result);
+            Guid categoryId = await _categoryService.AddCategoryAsync(category);
+
+            if (categoryId != Guid.Empty)
+            {
+                Log.Information("Category with the id {id} was created.");
+                return categoryId;
+            }
+            Log.Error("Category could not be added.");
+
+            return BadRequest("Category could not be added");
+
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
-            return BadRequest();
+            Log.Fatal(ex, "Category could not be added.");
+
+            return BadRequest("Category could not be added.");
         }
     }
 
     [HttpGet("list")]
-    public async Task<ActionResult<CategoryDTO>> GetTransactionsPaginated([FromQuery] int offset = 0, [FromQuery] int limit = 10)
+    public async Task<Paged<CategoryDTO>> GetTransactionsPaginated([FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10)
     {
-        List<Category> categories = (await _categoryService.GetCategoriesPaginatedAsync(offset, limit)).ToList();
+        var categories = await _categoryService.GetCategoriesPaginatedAsync(PageNumber, PageSize);
 
-        if (categories == null)
+        return new Paged<CategoryDTO>(categories.TotalCount, PageNumber, PageSize)
         {
-            return Ok(Enumerable.Empty<CategoryDTO>());
-        }
-
-        return Ok(categories.Select(category => new CategoryDTO(category)).ToList());
+            Items = categories.Rows.Select(category => new CategoryDTO(category))
+        };
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<CategoryDTO>> GetCategory(string id)
+    public async Task<ActionResult<CategoryDTO>> GetCategory(Guid id)
     {
-
+        if (id.IsEmpty())
+        {
+            return BadRequest("The id cannot be empty");
+        }
         try
         {
-            var category = await _categoryService.GetCategoryByIdAsync(id);
+            Category? category = await _categoryService.GetCategoryByIdAsync(id);
 
             if (category == null)
             {
-                return NotFound();
+                Log.Error("No category with the id {id} was found", id);
+
+                return NotFound("No categories with the associated id were found.");
             }
 
-            return Ok(new CategoryDTO(category));
+            return new CategoryDTO(category);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
-            return BadRequest("Could not retrieve the category");
+            Log.Fatal(ex, "Category with the id {id} could not be retrieved", id);
+
+            return BadRequest("Could not retrieve the cateogry");
         }
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<Category>> UpdateCategory(Guid id, UpdateCategoryRequest request)
+    public async Task<ActionResult<CategoryDTO>> UpdateCategory(Guid id, UpdateCategoryRequest request)
     {
-        if (id != request.Id)
+        if (id.IsEmpty())
         {
-            return BadRequest();
+            return BadRequest("The id cannot be empty");
         }
 
-        var category = Category.Create(
+        var validationErrors = request.GetValidationErrors();
+
+        if (validationErrors.Count != 0)
+        {
+            return BadRequest(new { Errors = validationErrors });
+        }
+
+        try
+        {
+            var category = Category.Create(
             id,
             request.Name
         );
 
-        try
-        {
-            await _categoryService.UpdateCategoryAsync(category);
+            bool updateSuccess = await _categoryService.UpdateCategoryAsync(category);
+
+            if (updateSuccess)
+            {
+                Log.Information("Category with the {id} was updated.", id);
+                return Ok();
+            }
+
+            Log.Error("Category with the {id} could not be updated.");
 
             return NoContent();
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex.Message);
-            return BadRequest("Could not update the category.");
+            Log.Fatal(ex, "Category with the {id} could not be updated", id);
+            return BadRequest("Category could not be updated.");
         }
     }
 
     [HttpDelete("{id}")]
     public async Task<ActionResult> DeleteCategory(Guid id)
     {
-        await _categoryService.DeleteCategoryAsync(id);
+        if (id.IsEmpty())
+        {
+            return BadRequest("The id cannot be empty");
+        }
 
-        return NoContent();
+        try
+        {
+            var softDelete = _softDeleteSettings.SoftDelete;
+            var deleteSuccess = await _categoryService.DeleteCategoryAsync(id, softDelete);
+
+            if (deleteSuccess)
+            {
+                Log.Information("Category with the {id} was deleted.", id);
+
+                return Ok();
+            }
+            Log.Error("Category with the {id} could not be deleted.");
+
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Subcategory with the {id} could not be deleted.", id);
+
+            return BadRequest("Subcategory could not be deleted");
+        }
     }
 
 }

@@ -1,12 +1,15 @@
+using ExpenseTracker.Core.Interfaces.Common;
+
 namespace ExpenseTracker.Core.Models;
 
-public class Category
+public class Category : IEntity
 {
     public Guid Id { get; private set; }
     public string Name { get; private set; }
     public DateTimeOffset CreatedDateTime { get; private set; }
     public DateTimeOffset UpdatedDateTime { get; private set; }
     public bool IsDeleted { get; private set; }
+
     private Category()
     {
 
