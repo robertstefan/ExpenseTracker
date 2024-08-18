@@ -11,8 +11,11 @@
     public TransactionType Type { get; set; } 
 
     public int CategoryId { get; set; }
-    // Navigation property
-    public Category Category { get; set; } = new Category();
+    public Category Category { get; set; } = new Category(); // Navigation property
+
+    public int SubcategoryId { get; set; } 
+    public Subcategory Subcategory { get; set; } = new Subcategory(); // Navigation property
+
 
     public Transaction()
     {

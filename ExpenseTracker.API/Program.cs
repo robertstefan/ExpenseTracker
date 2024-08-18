@@ -15,15 +15,18 @@ builder.Services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
     new ExpenseRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // @TODO: 2 interfaces??
-builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
+builder.Services.AddScoped<ITransactionRepository, TransactionsRepository>(sp =>
     new TransactionsRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(sp =>
     new CategoryRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<ISubcategoryRepository, SubcategoryRepository>(sp =>
+    new SubcategoryRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<TransactionService>();
 builder.Services.AddScoped<CategoryService>();
+builder.Services.AddScoped<SubcategoryService>();
 builder.Services.AddScoped<ExpenseService>();
 
 

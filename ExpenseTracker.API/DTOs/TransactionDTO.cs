@@ -15,13 +15,13 @@ namespace ExpenseTracker.API.DTOs
 
     public bool IsRecurrent { get; set; }
 
-    // @TODO: nullable?
-    public Category? Category { get; set; }
 
     // using attribute to validate so i don't have to do it everywhere i create a model/take user input
     [ValidTransactionType]
     public TransactionType Type { get; set; }
 
     public int CategoryId { get; set; }
+    public int SubcategoryId { get; set; }
+
   }
 }

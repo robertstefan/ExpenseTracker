@@ -73,6 +73,7 @@ namespace ExpenseTracker.API.Controllers
         {
           Amount = transactionModel.Amount,
           CategoryId = transactionModel.CategoryId,
+          SubcategoryId = transactionModel.SubcategoryId,
           Date = transactionModel.Date,
           Description = transactionModel.Description,
           IsRecurrent = transactionModel.IsRecurrent,

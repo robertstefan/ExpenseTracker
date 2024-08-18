@@ -1,7 +1,5 @@
 ﻿using System.Data.SqlClient;
-
 using Dapper;
-
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
@@ -21,8 +19,8 @@ namespace ExpenseTracker.Data.Repositories
     {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"INSERT INTO {TableName} 
-                          (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType)
-                   VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @Type)";
+                                (Id, Description, Amount, Date, CategoryId, SubcategoryId, IsRecurrent, TransactionType)
+                         VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @SubcategoryId, @IsRecurrent, @Type)";
 
       await connection.ExecuteAsync(query, transaction);
 
@@ -45,27 +43,31 @@ namespace ExpenseTracker.Data.Repositories
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"SELECT 
-            t.Id, 
-            t.Description, 
-            t.Amount, 
-            t.Date, 
-            t.IsRecurrent, 
-            t.TransactionType AS Type,
-            t.CategoryId, -- CategoryId from Transaction
-            c.Id AS Id, -- CategoryId from Category
-            c.Name AS Name
-        FROM [Transactions] t
-        JOIN Categories c ON t.CategoryId = c.Id";
+                    t.Id, 
+                    t.Description, 
+                    t.Amount, 
+                    t.Date, 
+                    t.IsRecurrent, 
+                    t.TransactionType AS Type,
+                    t.CategoryId,
+                    t.SubcategoryId,
+                    c.Id AS CategoryId,
+                    c.Name AS Name,
+                    s.Id AS SubcategoryId,
+                    s.Name AS Name
+                FROM [Transactions] t
+                JOIN Categories c ON t.CategoryId = c.Id
+                JOIN Subcategories s ON t.SubcategoryId = s.Id";
 
-      return await conn.QueryAsync<Transaction, Category, Transaction>(
+      return await conn.QueryAsync<Transaction, Category, Subcategory, Transaction>(
           query,
-          (transaction, category) =>
+          (transaction, category, subcategory) =>
           {
-            transaction.CategoryId = category.Id; // Map the CategoryId
-            transaction.Category = category;      // Assign the Category object
+            transaction.Category = category;  // Map Category
+            transaction.Subcategory = subcategory;  // Map Subcategory
             return transaction;
           },
-          splitOn: "CategoryId"
+          splitOn: "CategoryId,SubcategoryId"
       );
     }
 
@@ -73,30 +75,34 @@ namespace ExpenseTracker.Data.Repositories
     {
       using var conn = new SqlConnection(_connectionString);
 
-      var query = @"
-        SELECT 
-            t.Id, 
-            t.Description, 
-            t.Amount, 
-            t.Date, 
-            t.IsRecurrent, 
-            t.TransactionType AS Type,
-            t.CategoryId, -- CategoryId from Transaction
-            c.Id AS Id, -- CategoryId from Category
-            c.Name AS Name
-        FROM [Transactions] t
-        JOIN Categories c ON t.CategoryId = c.Id
-        WHERE t.Id = @Id";
+      var query = $@"SELECT 
+                    t.Id, 
+                    t.Description, 
+                    t.Amount, 
+                    t.Date, 
+                    t.IsRecurrent, 
+                    t.TransactionType AS Type,
+                    t.CategoryId,
+                    t.SubcategoryId,
+                    c.Id AS CategoryId,
+                    c.Name AS Name,
+                    s.Id AS SubcategoryId,
+                    s.Name AS Name
+                FROM [Transactions] t
+                JOIN Categories c ON t.CategoryId = c.Id
+                LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
+                WHERE t.Id = @Id";
 
-      var result = await conn.QueryAsync<Transaction, Category, Transaction>(
+      var result = await conn.QueryAsync<Transaction, Category, Subcategory, Transaction>(
           query,
-          (transaction, category) =>
+          (transaction, category, subcategory) =>
           {
-            transaction.Category = category; // Set the navigation property
+            transaction.Category = category;  // Map Category
+            transaction.Subcategory = subcategory;  // Map Subcategory
             return transaction;
           },
           new { Id = transactionId },
-          splitOn: "CategoryId" // This tells Dapper where the split between Transaction and Category occurs
+          splitOn: "CategoryId,SubcategoryId"
       );
 
       return result.FirstOrDefault();
@@ -107,29 +113,33 @@ namespace ExpenseTracker.Data.Repositories
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"SELECT 
-            t.Id, 
-            t.Description, 
-            t.Amount, 
-            t.Date, 
-            t.IsRecurrent, 
-            t.TransactionType AS Type,
-            t.CategoryId, -- CategoryId from Transaction
-            c.Id AS Id, -- CategoryId from Category
-            c.Name AS Name
-        FROM [Transactions] t
-        JOIN Categories c ON t.CategoryId = c.Id
-        WHERE TransactionType = @TypeId";
+                    t.Id, 
+                    t.Description, 
+                    t.Amount, 
+                    t.Date, 
+                    t.IsRecurrent, 
+                    t.TransactionType AS Type,
+                    t.CategoryId,
+                    t.SubcategoryId,
+                    c.Id AS CategoryId,
+                    c.Name AS Name,
+                    s.Id AS SubcategoryId,
+                    s.Name AS Name
+                FROM [Transactions] t
+                JOIN Categories c ON t.CategoryId = c.Id
+                LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
+                WHERE t.TransactionType = @TypeId";
 
-      return await conn.QueryAsync<Transaction, Category, Transaction>(
+      return await conn.QueryAsync<Transaction, Category, Subcategory, Transaction>(
           query,
-          (transaction, category) =>
+          (transaction, category, subcategory) =>
           {
-            transaction.CategoryId = category.Id; // Map the CategoryId
-            transaction.Category = category;      // Assign the Category object
+            transaction.Category = category;  // Map Category
+            transaction.Subcategory = subcategory;  // Map Subcategory
             return transaction;
           },
-          new {TypeId = (int)type},
-          splitOn: "CategoryId"
+          new { TypeId = (int)type },
+          splitOn: "CategoryId,SubcategoryId"
       );
     }
 
@@ -138,15 +148,15 @@ namespace ExpenseTracker.Data.Repositories
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"UPDATE {TableName}
-                              SET 
-                                  Description = @Description,
-                                  Amount = @Amount,
-                                  Date = @Date,
-                                  CategoryId = @CategoryId,
-                                  IsRecurrent = @IsRecurrent,
-                                  TransactionType = @Type
-                              
-                             WHERE Id = @Id";
+                            SET 
+                                Description = @Description,
+                                Amount = @Amount,
+                                Date = @Date,
+                                CategoryId = @CategoryId,
+                                SubcategoryId = @SubcategoryId,
+                                IsRecurrent = @IsRecurrent,
+                                TransactionType = @Type
+                            WHERE Id = @Id";
 
       var result = await conn.ExecuteAsync(query, transaction);
 
