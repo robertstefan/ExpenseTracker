@@ -12,16 +12,6 @@ namespace ExpenseTracker.Core.Services
             _transactionRepository = transactionRepository;
         }
 
-        public async Task<Guid> AddTransactionAsync(Transaction transaction)
-        {
-            return await _transactionRepository.CreateTransactionAsync(transaction);
-        }
-
-        public async Task<Transaction> GetTransactionByIdAndCategoryIdAsync(Guid transactionId, Guid categoryId)
-        {
-            return await _transactionRepository.GetTransactionByIdAndCategoryIdAsync(transactionId, categoryId);
-        }
-
         public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
         {
             return await _transactionRepository.GetTransactionByIdAsync(transactionId);
@@ -32,6 +22,21 @@ namespace ExpenseTracker.Core.Services
             return await _transactionRepository.GetAllTransactionsAsync();
         }
 
+        public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType)
+        {
+            return await _transactionRepository.GetTransactionsByTypeAsync(transactionType);
+        }
+
+        public async Task<IEnumerable<Transaction>> GetTransactionsByCategoryIdAsync(Guid categoryId)
+        {
+            return await _transactionRepository.GetTransactionsByCategoryIdAsync(categoryId);
+        }
+
+        public async Task<Guid> AddTransactionAsync(Transaction transaction)
+        {
+            return await _transactionRepository.CreateTransactionAsync(transaction);
+        }
+
         public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
         {
             return await _transactionRepository.UpdateTransactionAsync(transaction);
@@ -40,11 +45,6 @@ namespace ExpenseTracker.Core.Services
         public async Task<bool> DeleteTransactionAsync(Guid transactionId)
         {
             return await _transactionRepository.DeleteTransactionAsync(transactionId);
-        }
-
-        public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType)
-        {
-            return await _transactionRepository.GetTransactionsByTypeAsync(transactionType);
         }
     }
 }

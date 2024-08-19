@@ -18,31 +18,74 @@ namespace ExpenseTracker.API.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Transaction>>> GetAllTransactions()
+        public async Task<ActionResult<List<TransactionSummaryDTO>>> GetAllTransactions()
         {
-            return (await _transactionsService.GetAllTransactionsAsync()).ToList();
+            try
+            {
+                var transactions = await _transactionsService.GetAllTransactionsAsync();
+                List<TransactionSummaryDTO> transactionSummaries = new List<TransactionSummaryDTO>();
+                foreach (var transaction in transactions)
+                {
+                    transactionSummaries.Add(new TransactionSummaryDTO(transaction));
+                }
+                return Ok(transactionSummaries);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500);
+            }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult> GetTransactionById(Guid id)
+
+        [HttpGet("{transactionId}")]
+        public async Task<ActionResult<TransactionSummaryDTO>> GetTransactionById(Guid transactionId)
         {
-            return Ok(await _transactionsService.GetTransactionByIdAsync(id));
+            try
+            {
+                var transaction = await _transactionsService.GetTransactionByIdAsync(transactionId);
+
+                return Ok(new TransactionSummaryDTO(transaction));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500);
+            }
         }
+
 
         [HttpGet("/search-by-type")]
-        public async Task<ActionResult<List<Transaction>>> GetTransactionsByTransactionType(TransactionType transactionType)
+        public async Task<ActionResult<List<TransactionSummaryDTO>>> GetTransactionsByTransactionType(TransactionType transactionType)
         {
-            return Ok(await _transactionsService.GetTransactionsByTypeAsync(transactionType));
+            try
+            {
+                var transactions = await _transactionsService.GetTransactionsByTypeAsync(transactionType);
+                List<TransactionSummaryDTO> transactionSummaries = new List<TransactionSummaryDTO>();
+                foreach (var transaction in transactions)
+                {
+                    transactionSummaries.Add(new TransactionSummaryDTO(transaction));
+                }
+
+                return transactionSummaries;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return StatusCode(500);
+            }
         }
 
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> DeleteTransaction(Guid id)
+
+        [HttpDelete("{transactionId}")]
+        public async Task<ActionResult> DeleteTransaction(Guid transactionId)
         {
-            bool isSuccesfullyDeleted = await _transactionsService.DeleteTransactionAsync(id);
+            bool isSuccesfullyDeleted = await _transactionsService.DeleteTransactionAsync(transactionId);
 
             return isSuccesfullyDeleted ? NoContent() : BadRequest();
 
         }
+
 
         [HttpPut("{transactionId}")]
         public async Task<ActionResult> UpdateTransaction(Guid transactionId, UpdateTransactionDTO transactionModel)

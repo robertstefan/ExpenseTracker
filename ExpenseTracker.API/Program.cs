@@ -15,8 +15,12 @@ builder.Services.AddScoped<ITransactionsRepository, ITransactionsRepository>(sp 
     new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<ICategoriesRepository, ICategoriesRepository>(sp =>
     new CategoriesRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<ISubcategoriesRepository, ISubcategoriesRepository>(sp =>
+    new SubcategoriesRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddScoped<TransactionsService>();
 builder.Services.AddScoped<CategoriesService>();
+builder.Services.AddScoped<SubcategoriesService>();
 
 var app = builder.Build();
 

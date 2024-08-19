@@ -1,5 +1,4 @@
 ﻿using System.Data.SqlClient;
-
 using Dapper;
 
 using ExpenseTracker.Core.Interfaces;
@@ -17,12 +16,92 @@ namespace ExpenseTracker.Data.Repositories
             _connectionString = connectionString;
         }
 
+        public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            string query = @"
+            SELECT t.*, s.*, c.*
+            FROM Transactions t
+            LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
+            LEFT JOIN Categories c ON s.CategoryId = c.Id";
+
+            var transactionsList = new List<Transaction>();
+
+            var transactions = await conn.QueryAsync<Transaction, Subcategory, Category, Transaction>(
+                query,
+                (transaction, subcategory, category) =>
+                {
+                    transaction.Subcategory = subcategory;
+                    transaction.Category = category;
+                    transactionsList.Add(transaction);
+                    return transaction;
+                },
+                splitOn: "Id");
+
+            return transactionsList;
+        }
+
+        public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType)
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = @"
+                SELECT t.*, s.*, c.*
+                FROM Transactions t
+                LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
+                LEFT JOIN Categories c ON s.CategoryId = c.Id
+                WHERE t.TransactionType = @TransactionType";
+
+
+            var transactions = await conn.QueryAsync<Transaction, Subcategory, Category, Transaction>(query, (transaction, subcategory, category) =>
+            {
+                transaction.Subcategory = subcategory;
+                transaction.Category = category;
+
+                return transaction;
+            }, new { TransactionType = transactionType }, splitOn: "Id"
+            );
+            return transactions;
+        }
+
+        public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = @"
+                SELECT t.*, s.*, c.*
+                FROM Transactions t
+                LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
+                LEFT JOIN Categories c ON s.CategoryId = c.Id
+                WHERE t.Id = @TransactionId";
+
+            var transaction = await conn.QueryAsync<Transaction, Subcategory, Category, Transaction>(query, (transaction, subcategory, category) =>
+            {
+                transaction.Subcategory = subcategory;
+                transaction.Category = category;
+
+                return transaction;
+            }, new { TransactionId = transactionId }, splitOn: "Id"
+            );
+            return transaction.FirstOrDefault();
+        }
+
+        public async Task<IEnumerable<Transaction>> GetTransactionsByCategoryIdAsync(Guid categoryId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = $"SELECT * FROM {TableName} WHERE CategoryId = @CategoryId";
+
+            return await conn.QueryAsync<Transaction>(query, new { CategoryId = categoryId });
+        }
+
         public async Task<Guid> CreateTransactionAsync(Transaction transaction)
         {
             using var connection = new SqlConnection(_connectionString);
             var query = $@"INSERT INTO {TableName} 
-                              (Id, Description, Amount, Date, IsRecurrent, TransactionType, CategoryId)
-                          VALUES (@Id, @Description,@Amount, @Date, @IsRecurrent, @TransactionType, @CategoryId)";
+                              (Id, Description, Amount, Date, IsRecurrent, TransactionType, CategoryId, SubcategoryId)
+                          VALUES (@Id, @Description,@Amount, @Date, @IsRecurrent, @TransactionType, @CategoryId, @SubcategoryId)";
 
             await connection.ExecuteAsync(query, transaction);
 
@@ -38,33 +117,6 @@ namespace ExpenseTracker.Data.Repositories
             var affectedRows = await conn.ExecuteAsync(query, new { Id = transactionId });
 
             return affectedRows == 1;
-        }
-
-        public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
-        {
-            using var conn = new SqlConnection(_connectionString);
-
-            var query = $"SELECT * FROM {TableName}";
-
-            return await conn.QueryAsync<Transaction>(query);
-        }
-
-        public async Task<Transaction> GetTransactionByIdAndCategoryIdAsync(Guid transactionId, Guid categoryId)
-        {
-            using var conn = new SqlConnection(_connectionString);
-
-            var query = $"SELECT * FROM {TableName} WHERE Id = @Id AND CategoryId = @CategoryId";
-
-            return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId, CategoryId = categoryId });
-        }
-
-        public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType)
-        {
-            using var conn = new SqlConnection(_connectionString);
-
-            var query = $"SELECT * FROM {TableName} WHERE TransactionType = @TransactionType";
-
-            return await conn.QueryAsync<Transaction>(query, new { TransactionType = transactionType });
         }
 
         public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
@@ -89,15 +141,6 @@ namespace ExpenseTracker.Data.Repositories
             }
 
             return transaction;
-        }
-
-        public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
-        {
-            using var conn = new SqlConnection(_connectionString);
-
-            var query = $"SELECT * FROM {TableName} WHERE Id = @Id";
-
-            return await conn.QuerySingleAsync<Transaction>(query, new { Id = transactionId });
         }
     }
 }

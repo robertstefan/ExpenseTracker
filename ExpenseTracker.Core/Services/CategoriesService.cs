@@ -12,16 +12,6 @@ namespace ExpenseTracker.Core.Services
             _categoriesRepository = categoriesRepository;
         }
 
-        public async Task<Guid> CreateCategoryAsync(Category category)
-        {
-            return await _categoriesRepository.CreateCategoryAsync(category);
-        }
-
-        public async Task<bool> DeleteCategoryAsync(Guid categoryId)
-        {
-            return await _categoriesRepository.DeleteCategoryAsync(categoryId);
-        }
-
         public async Task<Category> GetCategoryByIdAsync(Guid categoryId)
         {
             return await _categoriesRepository.GetCategoryByIdAsync(categoryId);
@@ -32,9 +22,14 @@ namespace ExpenseTracker.Core.Services
             return await _categoriesRepository.GetAllCategoriesAsync();
         }
 
-        public async Task<string> GetCategoryName(Guid categoryId)
+        public async Task<Guid> CreateCategoryAsync(Category category)
         {
-            return await _categoriesRepository.GetCategoryName(categoryId);
+            return await _categoriesRepository.CreateCategoryAsync(category);
+        }
+
+        public async Task<bool> DeleteCategoryAsync(Guid categoryId)
+        {
+            return await _categoriesRepository.DeleteCategoryAsync(categoryId);
         }
     }
 }

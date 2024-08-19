@@ -4,18 +4,12 @@ namespace ExpenseTracker.Core.Interfaces
 {
     public interface ITransactionsRepository
     {
-        Task<Guid> CreateTransactionAsync(Transaction transaction);
-
-        Task<Transaction> GetTransactionByIdAndCategoryIdAsync(Guid transactionId, Guid categoryId);
-
-        Task<Transaction> GetTransactionByIdAsync(Guid transactionId);
-
-        Task<IEnumerable<Transaction>> GetAllTransactionsAsync();
-
-        Task<Transaction?> UpdateTransactionAsync(Transaction transaction);
-
-        Task<bool> DeleteTransactionAsync(Guid transactionId);
-
         Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType);
+        Task<IEnumerable<Transaction>> GetAllTransactionsAsync();
+        Task<IEnumerable<Transaction>> GetTransactionsByCategoryIdAsync(Guid categoryId);
+        Task<Transaction> GetTransactionByIdAsync(Guid transactionId);
+        Task<Guid> CreateTransactionAsync(Transaction transaction);
+        Task<Transaction?> UpdateTransactionAsync(Transaction transaction);
+        Task<bool> DeleteTransactionAsync(Guid transactionId);
     }
 }
