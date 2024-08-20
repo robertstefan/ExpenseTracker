@@ -7,26 +7,3 @@ CREATE TABLE [Transactions] (
     IsRecurrent BIT NULL DEFAULT 0,
     TransactionType INT DEFAULT 0,
 )
-
--- Create the stored procedure in the specified schema
-CREATE OR ALTER PROCEDURE dbo.RemoveUser
-  @userId int
-AS
-BEGIN
-  -- body of the stored procedure
-  BEGIN TRANSACTION
-
-    BEGIN TRY
-
-    DELETE FROM [Transactions] WHERE UserId = @userId
-    DELETE FROM [Users] WHERE Id = @userId
-
-    COMMIT TRANSACTION
-    END TRY
-    BEGIN CATCH
-
-      ROLLBACk;
-      THROW;
-
-    END CATCH
-END
