@@ -26,17 +26,25 @@ builder.Services.AddScoped<IRaportRepository, RaportRepository>(sp =>
     new RaportRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
 builder.Services.AddScoped<RaportService>();
 
+builder.Services.AddScoped<IUserRepository, UserRepository>(sp =>
+    new UserRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
+builder.Services.AddScoped<UserService>();
+
+builder.Services.AddCors();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+  app.UseSwagger();
+  app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
-
+app.UseCors(x => x.AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials()
+                                .AllowAnyOrigin());
 app.UseAuthorization();
 
 app.MapControllers();
