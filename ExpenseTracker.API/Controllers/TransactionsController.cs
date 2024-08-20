@@ -3,6 +3,7 @@ using ExpenseTracker.API.Requests.Transactions;
 using ExpenseTracker.Core.Common.Enums;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
+
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -65,11 +66,11 @@ public class TransactionsController(TransactionService _transactionService, ILog
       return BadRequest($"Date cannot be lower than {DateTime.MinValue.Date.ToShortDateString()}");
     }
 
-    TransactionType transactionTypeEnum = CastStringToTransactionType(transactionModel.TransactionType);
-
+    TransactionType transactionTypeEnum;// = CastStringToTransactionType(transactionModel.TransactionType);
+    Enum.TryParse(transactionModel.TransactionType, out transactionTypeEnum);
     try
     {
-      var transaction = Transaction.CreateNew(
+      Transaction transaction = Transaction.CreateNew(
         transactionModel.Description,
         transactionModel.Amount,
         transactionModel.Date,
@@ -128,6 +129,18 @@ public class TransactionsController(TransactionService _transactionService, ILog
     await _transactionService.DeleteTransactionAsync(id);
 
     return NoContent();
+  }
+
+
+  [HttpGet("categories/{categoryId}")]
+  public async Task<ActionResult<List<Transaction>>> GetTransactionsByCategory(Guid categoryId)
+  {
+    if (categoryId == Guid.Empty)
+    {
+      return BadRequest("Category identifier not valid");
+    }
+
+    return Ok(await _transactionService.GetTransactionByCategoryIdAsync(categoryId));
   }
 
   private static TransactionType CastStringToTransactionType(string transactionType)

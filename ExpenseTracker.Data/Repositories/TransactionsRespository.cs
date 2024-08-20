@@ -24,7 +24,7 @@ namespace ExpenseTracker.Data.Repositories
                 AND Id = @CategoryId
             )
             BEGIN
-                INSERT INTO {TableName} 
+                INSERT INTO {TableName}
                 (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType, CreatedDateTime, UpdatedDateTime)
                 VALUES 
                 (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @TransactionType, GETDATE(), GETDATE())
@@ -62,15 +62,12 @@ namespace ExpenseTracker.Data.Repositories
       using var conn = new SqlConnection(_connectionString);
 
       var query = @$"SELECT 
-                      t.Id,
-                      t.Description,
-                      t.Amount,
-                      t.Date,
-                      t.IsRecurrent,
-                      t.TransactionType,
-                      t.CreatedDateTime,
-                      t.UpdatedDateTime,
-                      c.Name as CategoryName
+                      t.*,
+                      c.Id SplitId,
+                      c.Id AS CategoryId,
+                      c.Name,
+                      c.IsDeleted,
+                      c.CreatedDateTime
                     FROM 
                       {TableName} t
                     INNER JOIN
@@ -82,7 +79,21 @@ namespace ExpenseTracker.Data.Repositories
                     FETCH NEXT @Limit
                     ROWS ONLY";
 
-      return await conn.QueryAsync<Transaction>(query, new { Offset = offset, Limit = limit });
+      List<Transaction> transactions = new List<Transaction>();
+
+      await conn.QueryAsync<Transaction, Category, Transaction>(query, (T, C) =>
+      {
+        if (C != null)
+        {
+          T.Category = C;
+        }
+
+        transactions.Add(T);
+
+        return T;
+      }, new { Offset = offset, Limit = limit }, splitOn: "SplitID");
+
+      return transactions;
     }
 
     public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
@@ -141,6 +152,29 @@ namespace ExpenseTracker.Data.Repositories
       }
 
       return transaction;
+    }
+
+    public async Task<IEnumerable<Transaction>> GetTransactionByCategoryIdAsync(Guid categoryId)
+    {
+      using (var conn = new SqlConnection(_connectionString))
+      {
+        var query = "SELECT T.*, C.Id AS SplitId, C.* FROM Transactions T INNER JOIN Categories C ON T.CategoryId = C.Id WHERE C.Id = @CategoryId";
+
+        List<Transaction> transactions = new List<Transaction>();
+        conn.Query<Transaction, Category, Transaction>(query, (T, C) =>
+        {
+          if (C != null)
+          {
+            T.Category = C;
+          }
+
+          transactions.Add(T);
+
+          return T;
+        }, new { CategoryId = categoryId }, splitOn: "SplitId");
+
+        return transactions;
+      }
     }
   }
 }
