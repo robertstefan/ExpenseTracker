@@ -176,5 +176,16 @@ namespace ExpenseTracker.Data.Repositories
         return transactions;
       }
     }
+
+    public async Task<IEnumerable<Transaction>> GetTransactionsByUserId(Guid userId)
+    {
+      using var connection = new SqlConnection(_connectionString);
+      string sql = $@"SELECT *
+                        FROM {TableName} 
+                      WHERE UserId = @UserId";
+      var transactions = await connection.QueryAsync<Transaction?>(sql, new { UserId = userId });
+
+      return transactions;
+    }
   }
 }
