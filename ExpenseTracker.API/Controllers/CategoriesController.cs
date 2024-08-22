@@ -6,15 +6,15 @@ using ExpenseTracker.API.Requests.Categories;
 using ExpenseTracker.Core.Common.Pagination;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Serilog;
 
 namespace ExpenseTracker.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class CategoriesController : ControllerBase
+[Route("api/categories")]
+public class CategoriesController : ApiController
 {
     private readonly CategoryService _categoryService;
     private readonly SoftDeleteSettings _softDeleteSettings;

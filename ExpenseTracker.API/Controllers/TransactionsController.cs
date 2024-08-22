@@ -13,9 +13,8 @@ using Serilog;
 
 namespace ExpenseTracker.API.Controllers;
 
-[Route("api/[controller]")]
-[ApiController]
-public class TransactionsController : ControllerBase
+[Route("api/transactions")]
+public class TransactionsController : ApiController
 {
   private readonly TransactionService _transactionService;
   private readonly SoftDeleteSettings _softDeleteSettings;

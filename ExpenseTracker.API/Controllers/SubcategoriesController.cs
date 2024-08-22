@@ -11,9 +11,9 @@ using Serilog;
 
 namespace ExpenseTracker.API.Controllers;
 
-[ApiController]
-[Route("api/[controller]")]
-public class SubcategoriesController : ControllerBase
+
+[Route("api/subcategories")]
+public class SubcategoriesController : ApiController
 {
     private readonly SubcategoryService _subcategoryService;
     private readonly SoftDeleteSettings _softDeleteSettings;

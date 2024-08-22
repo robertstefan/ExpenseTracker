@@ -12,6 +12,7 @@ public static class DependencyInjection
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
         services.Configure<SoftDeleteSettings>(configurationManager.GetSection(GlobalConstants.ConfigurationKeys.SoftDelete));
+        services.AddCors();
         return services;
     }
 }
