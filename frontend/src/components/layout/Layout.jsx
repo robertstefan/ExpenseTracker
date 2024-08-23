@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { AppShell, Box } from '@mantine/core';
-// import Header from '../header';
 import Navbar from '../navbar';
 
 function Layout() {
@@ -9,7 +8,6 @@ function Layout() {
 
 	return (
 		<AppShell padding='md' navbar={{ width: 300, breakpoint: 'sm', collapsed: { mobile: !opened } }}>
-
 			<AppShell.Navbar>
 				<Navbar />
 			</AppShell.Navbar>

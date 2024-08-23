@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Group, Code, Text } from '@mantine/core';
-import { IconLogout, IconDashboard } from '@tabler/icons-react';
+import { IconLogout, IconDashboard, IconCategory } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 
-const data = [{ link: '/', label: 'Dashboard', icon: IconDashboard }];
+const data = [
+	{ link: '/', label: 'Dashboard', icon: IconDashboard },
+	{ link: '/category', label: 'Categories', icon: IconCategory },
+];
 
 export default function Navbar() {
 	const [active, setActive] = useState('Dashboard');

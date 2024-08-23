@@ -4,16 +4,16 @@ export const categoryEndpoints = api.enhanceEndpoints({ addTagTypes: ['Category'
 	endpoints: (builder) => ({
 		getCategories: builder.query({
 			query: (params) => ({ url: '/categories/list', params }),
-			transformResponse: (res) => res.data,
+			transformResponse: (res) => res,
 			providesTags: (result) =>
 				result
 					? [...result.map(({ id }) => ({ type: 'Category', id })), { type: 'Category', id: 'LIST' }]
 					: [{ type: 'Category', id: 'LIST' }],
 		}),
 		getCategory: builder.query({
-			query: ({ id, ...params }) => ({ url: `/categories/${id}`, params }),
-			transformResponse: (res) => res.data,
-			providesTags: (result) => [{ type: 'Category', id: result?.data?.id }],
+			query: (id) => ({ url: `/categories/${id}` }),
+			transformResponse: (res) => res,
+			providesTags: (result) => [{ type: 'Category', id: result?.id }],
 		}),
 		createCategory: builder.mutation({
 			query: (body) => ({
