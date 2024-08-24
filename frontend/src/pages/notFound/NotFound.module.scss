@@ -1,0 +1,27 @@
+.root {
+    padding-top: 80;
+    padding-bottom: 80;
+
+    .label {
+        text-align: center;
+        font-weight: 900;
+        font-size: 220px;
+        line-height: 1;
+        margin-bottom: 36px;
+        color: #e9ecef;
+    }
+
+    .title {
+        font-family: 'Greycliff CF';
+        text-align: center;
+        font-weight: 900;
+        font-size: 38;
+    }
+
+    .description {
+        max-width: 500;
+        margin: auto;
+        margin-top: 20px;
+        margin-bottom: 30px;
+    }
+}

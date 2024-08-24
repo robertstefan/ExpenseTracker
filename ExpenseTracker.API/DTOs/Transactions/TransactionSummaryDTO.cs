@@ -1,5 +1,5 @@
 ﻿using ExpenseTracker.API.DTOs.Categories;
-using ExpenseTracker.API.DTOs.Subcategories;
+
 using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.API.DTOs.Transactions
@@ -19,8 +19,7 @@ namespace ExpenseTracker.API.DTOs.Transactions
         public TransactionType TransactionType { get; set; }
 
         public CategoryDetailsDTO Category { get; set; }
-
-        public SubcategoryDetailsDTO Subcategory { get; set; }
+        public CategoryDetailsDTO? ParentCategory { get; set; }
 
         public TransactionSummaryDTO()
         {
@@ -36,7 +35,10 @@ namespace ExpenseTracker.API.DTOs.Transactions
             IsRecurrent = transaction.IsRecurrent;
             TransactionType = transaction.TransactionType;
             Category = new CategoryDetailsDTO(transaction.Category);
-            Subcategory = new SubcategoryDetailsDTO(transaction.Subcategory);
+            if (transaction.Category.ParentCategory != null)
+            {
+                ParentCategory = new CategoryDetailsDTO(transaction.Category.ParentCategory);
+            }
         }
     }
 }

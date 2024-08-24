@@ -7,6 +7,7 @@ namespace ExpenseTracker.Core.Interfaces
         Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType transactionType);
         Task<IEnumerable<Transaction>> GetAllTransactionsAsync();
         Task<IEnumerable<Transaction>> GetTransactionsByCategoryIdAsync(Guid categoryId);
+        Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId);
         Task<Transaction> GetTransactionByIdAsync(Guid transactionId);
         Task<Guid> CreateTransactionAsync(Transaction transaction);
         Task<Transaction?> UpdateTransactionAsync(Transaction transaction);

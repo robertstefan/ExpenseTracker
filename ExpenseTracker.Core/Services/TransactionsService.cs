@@ -32,6 +32,11 @@ namespace ExpenseTracker.Core.Services
             return await _transactionRepository.GetTransactionsByCategoryIdAsync(categoryId);
         }
 
+        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId)
+        {
+            return await _transactionRepository.GetTransactionsByUserIdAsync(userId);
+        }
+
         public async Task<Guid> AddTransactionAsync(Transaction transaction)
         {
             return await _transactionRepository.CreateTransactionAsync(transaction);

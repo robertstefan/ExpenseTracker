@@ -21,19 +21,23 @@ namespace ExpenseTracker.Data.Repositories
             using var conn = new SqlConnection(_connectionString);
 
             string query = @"
-            SELECT t.*, s.*, c.*
-            FROM Transactions t
-            LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
-            LEFT JOIN Categories c ON s.CategoryId = c.Id";
+                    SELECT t.*, c.*, pc.*
+                    FROM Transactions t
+                    LEFT JOIN Categories c ON t.CategoryId = c.Id
+                    LEFT JOIN Categories pc ON c.ParentCategoryId = pc.Id";
 
             var transactionsList = new List<Transaction>();
 
-            var transactions = await conn.QueryAsync<Transaction, Subcategory, Category, Transaction>(
+            var transactions = await conn.QueryAsync<Transaction, Category, Category, Transaction>(
                 query,
-                (transaction, subcategory, category) =>
+                (transaction, category, parentCategory) =>
                 {
-                    transaction.Subcategory = subcategory;
+                    if (parentCategory != null)
+                    {
+                        category.ParentCategory = parentCategory;
+                    }
                     transaction.Category = category;
+
                     transactionsList.Add(transaction);
                     return transaction;
                 },
@@ -47,16 +51,19 @@ namespace ExpenseTracker.Data.Repositories
             using var conn = new SqlConnection(_connectionString);
 
             var query = @"
-                SELECT t.*, s.*, c.*
-                FROM Transactions t
-                LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
-                LEFT JOIN Categories c ON s.CategoryId = c.Id
-                WHERE t.TransactionType = @TransactionType";
+                    SELECT t.*, c.*, pc.*
+                    FROM Transactions t
+                    LEFT JOIN Categories c ON t.CategoryId = c.Id
+                    LEFT JOIN Categories pc ON c.ParentCategoryId = pc.Id
+                    WHERE t.TransactionType = @TransactionType";
 
 
-            var transactions = await conn.QueryAsync<Transaction, Subcategory, Category, Transaction>(query, (transaction, subcategory, category) =>
+            var transactions = await conn.QueryAsync<Transaction, Category, Category, Transaction>(query, (transaction, category, parentCategory) =>
             {
-                transaction.Subcategory = subcategory;
+                if (parentCategory != null)
+                {
+                    category.ParentCategory = parentCategory;
+                }
                 transaction.Category = category;
 
                 return transaction;
@@ -70,20 +77,25 @@ namespace ExpenseTracker.Data.Repositories
             using var conn = new SqlConnection(_connectionString);
 
             var query = @"
-                SELECT t.*, s.*, c.*
-                FROM Transactions t
-                LEFT JOIN Subcategories s ON t.SubcategoryId = s.Id
-                LEFT JOIN Categories c ON s.CategoryId = c.Id
-                WHERE t.Id = @TransactionId";
+                    SELECT t.*, c.*, pc.*
+                    FROM Transactions t
+                    LEFT JOIN Categories c ON t.CategoryId = c.Id
+                    LEFT JOIN Categories pc ON c.ParentCategoryId = pc.Id
+                    WHERE t.Id = @TransactionId";
 
-            var transaction = await conn.QueryAsync<Transaction, Subcategory, Category, Transaction>(query, (transaction, subcategory, category) =>
+            var transaction = await conn.QueryAsync<Transaction, Category, Category, Transaction>(query, (transaction, category, parentCategory) =>
             {
-                transaction.Subcategory = subcategory;
+                if (parentCategory != null)
+                {
+                    category.ParentCategory = parentCategory;
+                }
                 transaction.Category = category;
 
                 return transaction;
-            }, new { TransactionId = transactionId }, splitOn: "Id"
+            },
+                new { TransactionId = transactionId }, splitOn: "Id"
             );
+
             return transaction.FirstOrDefault();
         }
 
@@ -95,13 +107,38 @@ namespace ExpenseTracker.Data.Repositories
 
             return await conn.QueryAsync<Transaction>(query, new { CategoryId = categoryId });
         }
+        public async Task<IEnumerable<Transaction>> GetTransactionsByUserIdAsync(int userId)
+        {
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = @"
+                    SELECT t.*, c.*, pc.*
+                    FROM Transactions t
+                    LEFT JOIN Categories c ON t.CategoryId = c.Id
+                    LEFT JOIN Categories pc ON c.ParentCategoryId = pc.Id
+                    WHERE t.UserId = @UserId";
+
+            var transactions = await conn.QueryAsync<Transaction, Category, Category, Transaction>(query, (transaction, category, parentCategory) =>
+            {
+                if (parentCategory != null)
+                {
+                    category.ParentCategory = parentCategory;
+                }
+                transaction.Category = category;
+
+                return transaction;
+            }, new { UserId = userId }, splitOn: "Id"
+             );
+            return transactions;
+
+        }
 
         public async Task<Guid> CreateTransactionAsync(Transaction transaction)
         {
             using var connection = new SqlConnection(_connectionString);
             var query = $@"INSERT INTO {TableName} 
-                              (Id, Description, Amount, Date, IsRecurrent, TransactionType, CategoryId, SubcategoryId)
-                          VALUES (@Id, @Description,@Amount, @Date, @IsRecurrent, @TransactionType, @CategoryId, @SubcategoryId)";
+                              (Id, Description, Amount, Date, IsRecurrent, TransactionType, CategoryId, UserId)
+                          VALUES (@Id, @Description,@Amount, @Date, @IsRecurrent, @TransactionType, @CategoryId, @UserId)";
 
             await connection.ExecuteAsync(query, transaction);
 
@@ -130,7 +167,7 @@ namespace ExpenseTracker.Data.Repositories
                                   Date = @Date,
                                   IsRecurrent = @IsRecurrent,
                                   TransactionType = @TransactionType
-                              
+
                           WHERE Id = @Id";
 
             var result = await conn.ExecuteAsync(query, transaction);

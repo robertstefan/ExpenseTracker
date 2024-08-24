@@ -33,7 +33,7 @@ namespace ExpenseTracker.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while retrieving transactions");
             }
         }
 
@@ -41,16 +41,20 @@ namespace ExpenseTracker.API.Controllers
         [HttpGet("{transactionId}")]
         public async Task<ActionResult<TransactionSummaryDTO>> GetTransactionById(Guid transactionId)
         {
+            var transaction = await _transactionsService.GetTransactionByIdAsync(transactionId);
+
+            if(transaction == null)
+            {
+                return BadRequest("Resource not found");
+            }
             try
             {
-                var transaction = await _transactionsService.GetTransactionByIdAsync(transactionId);
-
                 return Ok(new TransactionSummaryDTO(transaction));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while retrieving transaction");
             }
         }
 
@@ -72,7 +76,7 @@ namespace ExpenseTracker.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while retrieving transactions");
             }
         }
 
@@ -93,7 +97,7 @@ namespace ExpenseTracker.API.Controllers
             Transaction transactionToUpdate = await _transactionsService.GetTransactionByIdAsync(transactionId);
 
             if (transactionToUpdate == null)
-                return BadRequest();
+                return BadRequest("Resource not found");
             if (transactionModel.Amount <= 0)
                 return BadRequest("Amount cannot be less or equal to 0");
             if (transactionModel.Date <= DateTime.MinValue)
@@ -112,7 +116,7 @@ namespace ExpenseTracker.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while updating the transaction");
             }
 
         }

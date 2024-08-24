@@ -6,6 +6,7 @@ namespace ExpenseTracker.Core.Interfaces
     {
         Task<Category> GetCategoryByIdAsync(Guid categoryId);
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        //Task<IEnumerable<Category>> GetSubcategoriesByParentCategoryIdAsync(Guid parentCategoryId);
         Task<Guid> CreateCategoryAsync(Category category);
         Task<bool> DeleteCategoryAsync(Guid categoryId);
     }

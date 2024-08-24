@@ -1,0 +1,178 @@
+@font-face {
+    font-family: 'CircularStd-Bold';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/CircularStd/CircularStd-Bold.otf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'CircularStd-Book';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/CircularStd/CircularStd-Book.otf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'CircularStd-Black';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/CircularStd/CircularStd-Black.otf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'CircularStd-Medium';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/CircularStd/CircularStd-Medium.otf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'ProximaNova-Regular';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/ProximaNova/ProximaNova-Regular.otf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'ProximaNova-Semibold';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/ProximaNova/ProximaNova-Semibold.otf');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'ProximaNova-Bold';
+    // src: url('/static/fonts/Montserrat-Regular.ttf'); // pattern: /directoryName/file.extension
+    src: url('../fonts/ProximaNova/ProximaNova-Bold.otf');
+    font-display: swap;
+}
+
+
+@font-face {
+    font-family: 'Faktum Test Regular';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Faktum Test Regular'), url('../fonts/Faktum Test Regular.woff') format('woff');
+}
+
+
+@font-face {
+    font-family: 'Faktum Test Bold';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Faktum Test Bold'), url('../fonts/Faktum Test Bold.woff') format('woff');
+}
+
+.animateRing circle {
+    animation: donut 1s ease-out forwards;
+}
+
+.select-none {
+    user-select: none;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.swal2-confirm {
+    background-color: #3586C6 !important;
+
+    &:focus {
+        box-shadow: 0 0 0 3px rgb(140 211 255 / 50%) !important;
+    }
+}
+
+a {
+    all: unset;
+    cursor: pointer;
+}
+
+
+
+body::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #f5f5f5;
+    border-radius: 10px;
+}
+
+body::-webkit-scrollbar {
+    width: 8px;
+    background-color: #f5f5f5;
+}
+
+body::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-radius: 10px;
+    background-image: -webkit-gradient(linear,
+            0 0,
+            0 100%,
+            color-stop(0.5, rgba(255, 255, 255, 0.2)),
+            color-stop(0.5, transparent),
+            to(transparent));
+}
+
+
+.root {
+    @media screen and (max-width: 600px) {
+        table {
+            border: 0;
+            border-collapse: collapse;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        table thead {
+            border: none;
+            clip: rect(0 0 0 0);
+            height: 1px;
+            margin: -1px;
+            overflow: hidden;
+            padding: 0;
+            position: absolute;
+            width: 1px;
+        }
+
+        table th,
+        table td {
+            padding: 0.625em;
+            text-align: center;
+        }
+
+        table tr {
+            display: block;
+            margin-bottom: 0.625em;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 0.35em;
+        }
+
+        table td {
+            border-bottom: 1px solid #ddd;
+            display: block;
+            font-size: 0.8em;
+            text-align: right;
+        }
+
+        table td::before {
+            /*
+    * aria-label has no advantage, it won't be read inside a table
+    content: attr(aria-label);
+    */
+            content: attr(data-label);
+            float: left;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        table td:last-child {
+            border-bottom: 0;
+        }
+
+        table td:first-child {
+            border-top: 0;
+        }
+    }
+}

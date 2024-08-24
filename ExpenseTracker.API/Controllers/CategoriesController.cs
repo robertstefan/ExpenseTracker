@@ -1,5 +1,5 @@
 ﻿using ExpenseTracker.API.DTOs.Categories;
-using ExpenseTracker.API.DTOs.Subcategories;
+
 using ExpenseTracker.API.DTOs.Transactions;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
@@ -14,28 +14,33 @@ namespace ExpenseTracker.API.Controllers
     {
         private readonly CategoriesService _categoriesService;
         private readonly TransactionsService _transactionsService;
-        private readonly SubcategoriesService _subcategoriesService;
 
-        public CategoriesController(CategoriesService categoriesService, TransactionsService transactionsService, SubcategoriesService subcategoriesService)
+        public CategoriesController(CategoriesService categoriesService, TransactionsService transactionsService)
         {
             _categoriesService = categoriesService;
             _transactionsService = transactionsService;
-            _subcategoriesService = subcategoriesService;
+
         }
 
 
         [HttpGet("{categoryId}")]
         public async Task<ActionResult<CategoryDTO>> GetCategoryById(Guid categoryId)
         {
+            var category = await _categoriesService.GetCategoryByIdAsync(categoryId);
+
+            if (category == null)
+            {
+                return BadRequest("Resource not found");
+            }
+
             try
             {
-                var category = await _categoriesService.GetCategoryByIdAsync(categoryId);
                 return Ok(new CategoryDTO(category));
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while retrieving the category.");
             }
         }
 
@@ -56,7 +61,7 @@ namespace ExpenseTracker.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while retrieving categories.");
             }
         }
 
@@ -77,23 +82,22 @@ namespace ExpenseTracker.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while retrieving transactions");
             }
 
         }
 
-
         [HttpPost]
-        public async Task<ActionResult<Category>> CreateCategory(CreateCategoryDTO categoryDTO)
+        public async Task<ActionResult<CategoryDTO>> CreateCategory(CreateCategoryDTO categoryDTO)
         {
             if (categoryDTO == null)
             {
-                return BadRequest();
+                return BadRequest("Payload can't be null");
             }
 
             if (string.IsNullOrEmpty(categoryDTO.CategoryName))
             {
-                return BadRequest();
+                return BadRequest("Category name can't be null or empty");
             }
 
             try
@@ -106,7 +110,49 @@ namespace ExpenseTracker.API.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                Console.WriteLine(ex.Message);
+                return BadRequest("Error while creating the category.");
+            }
+        }
+
+        [HttpPost("{parentCategoryId}/create-subcategory")]
+        public async Task<ActionResult<Category>> CreateSubCategory(Guid parentCategoryId, CreateCategoryDTO categoryDTO)
+        {
+            var parentCategory = await _categoriesService.GetCategoryByIdAsync(parentCategoryId);
+
+
+            if (parentCategory == null)
+            {
+                return BadRequest("Parent Category with given id does not exist");
+            }
+
+            if (parentCategory.ParentCategoryId != null)
+            {
+                return BadRequest("You can't create a subcategory for this category because it's already a subcategory.");
+            }
+
+            if (categoryDTO == null)
+            {
+                return BadRequest("Payload can't be null");
+            }
+
+            if (string.IsNullOrEmpty(categoryDTO.CategoryName))
+            {
+                return BadRequest("Category name can't be null or empty");
+            }
+
+            try
+            {
+                Category categoryToCreate = new Category() { CategoryName = categoryDTO.CategoryName, ParentCategoryId = parentCategoryId, ParentCategory = parentCategory };
+
+                Guid createdCategoryId = await _categoriesService.CreateCategoryAsync(categoryToCreate);
+
+                return CreatedAtAction(nameof(GetCategoryById), new { categoryId = createdCategoryId }, categoryToCreate);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest("Error while creating the subcategory");
             }
         }
 
@@ -132,10 +178,6 @@ namespace ExpenseTracker.API.Controllers
 
             var category = await _categoriesService.GetCategoryByIdAsync(categoryId);
 
-            if (category.Subcategory == null)
-            {
-                return BadRequest("You can't insert a transaction into a category that doesn't have a subcategory.");
-            }
 
             try
             {
@@ -147,7 +189,7 @@ namespace ExpenseTracker.API.Controllers
                     IsRecurrent = transactionModel.IsRecurrent,
                     TransactionType = transactionModel.TransactionType,
                     CategoryId = categoryId,
-                    SubcategoryId = category.Subcategory.Id
+                    UserId = transactionModel.UserId
                 };
 
                 Guid createdTransactionId = await _transactionsService.AddTransactionAsync(transactionToCreate);
@@ -157,28 +199,9 @@ namespace ExpenseTracker.API.Controllers
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return StatusCode(500);
+                return BadRequest("Error while creating the transaction");
             }
         }
-
-
-        [HttpPost("{categoryId}/subcategories")]
-        public async Task<ActionResult<Guid>> CreateSubcategory(CreateSubcategoryDTO subcategoryDTO, Guid categoryId)
-        {
-            try
-            {
-                Subcategory subcategoryToCreate = new Subcategory() { SubcategoryName = subcategoryDTO.SubcategoryName, CategoryId = categoryId };
-                Guid createdSubcategoryId = await _subcategoriesService.CreateSubcategoryAsync(subcategoryToCreate);
-
-                return createdSubcategoryId;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return StatusCode(500);
-            }
-        }
-
 
         [HttpDelete("{categoryId}")]
         public async Task<ActionResult> DeleteCategory(Guid categoryId)

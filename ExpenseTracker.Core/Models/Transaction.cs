@@ -18,8 +18,8 @@ namespace ExpenseTracker.Core.Models
         public TransactionType TransactionType { get; set; }
 
         public Guid CategoryId { get; set; }
-        public Guid SubcategoryId { get; set; }
+        public int UserId { get; set; }
         public Category? Category { get; set; }
-        public Subcategory? Subcategory { get; set; }
+
     }
 }
