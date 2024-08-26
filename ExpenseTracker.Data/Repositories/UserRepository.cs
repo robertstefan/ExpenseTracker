@@ -34,7 +34,8 @@ public class UserRepository(string _connectionString) : IUserRepository
         using var connection = new SqlConnection(_connectionString);
         string sql = $@"SELECT Id, Username, Email, PasswordHash, FirstName, LastName, LockedOut, LoginTries 
                         FROM {TableName} 
-                      WHERE Email = @Email";
+                      WHERE Email = @Email
+                      AND IsDeleted = 0";
         var user = await connection.QuerySingleOrDefaultAsync<User>(sql, new { Email = email });
 
         return user;
@@ -45,37 +46,42 @@ public class UserRepository(string _connectionString) : IUserRepository
         using var connection = new SqlConnection(_connectionString);
         string sql = $@"SELECT Id, Username, Email, FirstName, LastName, LockedOut, LoginTries, CreatedDateTime, UpdatedDateTime 
                         FROM {TableName} 
-                      WHERE Id = @Id";
+                      WHERE Id = @Id
+                      AND IsDeleted = 0";
         var user = await connection.QuerySingleOrDefaultAsync<User>(sql, new { Id = id });
 
         return user;
     }
 
-    public async Task<bool> RemoveUserAsync(Guid userId)
+    public async Task<bool> RemoveUserAsync(Guid userId, bool softDelete)
     {
         using var connection = new SqlConnection(_connectionString);
 
-        string userSql = "EXECUTE [dbo].[RemoveUser] @userId";
-        int affected = await connection.ExecuteAsync(userSql, new { userId }, commandType: System.Data.CommandType.StoredProcedure);
+        string storedProcedure = "[dbo].[RemoveUser]";
+        int affected = await connection.ExecuteAsync(
+            storedProcedure,
+            new { userId, softDelete },
+            commandType: System.Data.CommandType.StoredProcedure
+        );
 
         return affected > 0;
     }
 
-    public async Task<User> UpdateUserAsync(User user)
+    public async Task<bool> UpdateUserAsync(User user)
     {
         using var connection = new SqlConnection(_connectionString);
 
         string sql = $@"UPDATE {TableName} SET
-                      Email = @Email,
                       Username = @Username,
                       LastName = @LastName,
                       FirstName = @FirstName,
-                      UpdatedDateTime = GETDATE(),
-                      WHERE Id = @Id";
+                      UpdatedDateTime = GETDATE()
+                      WHERE Id = @Id
+                      AND IsDeleted = 0";
 
-        await connection.ExecuteAsync(sql, user);
+        var affectedRows = await connection.ExecuteAsync(sql, user);
 
-        return user;
+        return affectedRows == 1;
     }
 
     public async Task IncrementFailedLoginAttemptsAsync(Guid userId)
@@ -120,5 +126,37 @@ public class UserRepository(string _connectionString) : IUserRepository
                         WHERE Id = @Id";
 
         await connection.ExecuteAsync(sql, new { Id = userId });
+    }
+
+    public async Task<bool> ResetPassword(Guid userId, string password)
+    {
+
+        using var connection = new SqlConnection(_connectionString);
+
+        string sql = $@"UPDATE {TableName} SET
+                        PasswordHash = @Password,
+                        UpdatedDateTime = GETDATE()
+                        WHERE Id = @UserId";
+
+        var affectedRows = await connection.ExecuteAsync(sql, new { UserId = userId, Password = password });
+
+        return affectedRows == 1;
+    }
+
+    public async Task<bool> ChangeEmail(Guid UserId, string Email)
+    {
+
+        using var connection = new SqlConnection(_connectionString);
+
+        string sql = $@"UPDATE {TableName} SET
+                        Email = @Email,
+                        UpdatedDateTime = GETDATE()
+                        WHERE Id = @UserId";
+
+        var affectedRows = await connection.ExecuteAsync(sql, new { UserId = UserId, Email = Email });
+
+        return affectedRows == 1;
+
+
     }
 }

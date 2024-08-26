@@ -14,17 +14,11 @@ using Serilog;
 namespace ExpenseTracker.API.Controllers;
 
 [Route("api/categories")]
-public class CategoriesController : ApiController
+public class CategoriesController(CategoryService _categoryService, IOptions<SoftDeleteSettings> softDeleteSettings) : ApiController
 {
-    private readonly CategoryService _categoryService;
-    private readonly SoftDeleteSettings _softDeleteSettings;
+    private readonly SoftDeleteSettings _softDeleteSettings = softDeleteSettings.Value;
 
-    public CategoriesController(CategoryService categoryService, IOptions<SoftDeleteSettings> softDeleteSettings)
-    {
-        _categoryService = categoryService;
-        _softDeleteSettings = softDeleteSettings.Value;
-    }
-    [HttpPost]
+    [HttpPost("create")]
     public async Task<ActionResult<Guid>> CreateCategoryAsync(CreateCategoryRequest request)
     {
         var validationErrors = request.GetValidationErrors();
@@ -99,7 +93,7 @@ public class CategoriesController : ApiController
         }
     }
 
-    [HttpPut("{id}")]
+    [HttpPost("update/{id}")]
     public async Task<ActionResult<CategoryDTO>> UpdateCategory(Guid id, UpdateCategoryRequest request)
     {
         if (id.IsEmpty())
@@ -118,7 +112,8 @@ public class CategoriesController : ApiController
         {
             var category = Category.Create(
             id,
-            request.Name
+            request.Name,
+            request.ParentCategoryId
         );
 
             bool updateSuccess = await _categoryService.UpdateCategoryAsync(category);
@@ -140,7 +135,7 @@ public class CategoriesController : ApiController
         }
     }
 
-    [HttpDelete("{id}")]
+    [HttpPost("delete/{id}")]
     public async Task<ActionResult> DeleteCategory(Guid id)
     {
         if (id.IsEmpty())

@@ -14,15 +14,10 @@ using Serilog;
 namespace ExpenseTracker.API.Controllers;
 
 [Route("api/transactions")]
-public class TransactionsController : ApiController
+public class TransactionsController(TransactionService _transactionService, IOptions<SoftDeleteSettings> softDeleteSettings) : ApiController
 {
-  private readonly TransactionService _transactionService;
-  private readonly SoftDeleteSettings _softDeleteSettings;
-  public TransactionsController(TransactionService transactionService, IOptions<SoftDeleteSettings> softDeleteSettings)
-  {
-    _transactionService = transactionService;
-    _softDeleteSettings = softDeleteSettings.Value;
-  }
+  private readonly SoftDeleteSettings _softDeleteSettings = softDeleteSettings.Value;
+
   [HttpGet("list")]
   public async Task<ActionResult<Paged<TransactionDTO>>> GetTransactionsPaginated([FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10)
   {
@@ -68,7 +63,7 @@ public class TransactionsController : ApiController
     }
   }
 
-  [HttpPost]
+  [HttpPost("create")]
   public async Task<ActionResult<Transaction>> AddTransaction(CreateTransactionRequest transactionModel)
   {
     var validationErrors = transactionModel.GetValidationErrors();
@@ -87,9 +82,9 @@ public class TransactionsController : ApiController
         transactionModel.Amount,
         transactionModel.Date,
         transactionModel.CategoryId,
-        transactionModel.SubcategoryId,
         transactionModel.IsRecurrent,
-        transactionTypeEnum
+        transactionTypeEnum,
+        transactionModel.UserId
       );
       Guid result = await _transactionService.AddTransactionAsync(transaction);
 
@@ -111,7 +106,7 @@ public class TransactionsController : ApiController
 
   }
 
-  [HttpPut("{id}")]
+  [HttpPost("update/{id}")]
   public async Task<ActionResult<Transaction>> UpdateTransaction(Guid id, UpdateTransactionRequest request)
   {
     if (id.IsEmpty())
@@ -133,9 +128,9 @@ public class TransactionsController : ApiController
         request.Amount,
         request.Date,
         request.CategoryId,
-        request.SubcategoryId,
         request.IsRecurrent,
-        transactionTypeEnum
+        transactionTypeEnum,
+        request.UserId
       );
 
       var updateSuccess = await _transactionService.UpdateTransactionAsync(transaction);
@@ -157,8 +152,8 @@ public class TransactionsController : ApiController
     }
   }
 
-  [HttpDelete("{id}")]
-  public async Task<ActionResult<Transaction>> DeleteTransaction(Guid id)
+  [HttpPost("delete/{id}")]
+  public async Task<ActionResult> DeleteTransaction(Guid id)
   {
     if (id.IsEmpty())
     {

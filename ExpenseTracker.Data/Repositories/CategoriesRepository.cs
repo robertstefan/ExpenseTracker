@@ -10,15 +10,15 @@ namespace ExpenseTracker.Data.Repositories;
 
 public class CategoriesRepository(string _connectionString) : ICategoriesRepository
 {
-    private static string TableName => "[Categories]";
+    private const string TableName = "[Categories]";
     public async Task<Guid> AddCategoryAsync(Category category)
     {
         using var connection = new SqlConnection(_connectionString);
         string sql = $@"INSERT INTO 
                         {TableName} 
-                        (Id, Name, CreatedDateTime, UpdatedDateTime) 
+                        (Id, Name, ParentCategoryId, CreatedDateTime) 
                         VALUES 
-                        (@Id, @Name, GETDATE(), GETDATE())";
+                        (@Id, @Name, @ParentCategoryId, GETDATE())";
         await connection.ExecuteAsync(sql, category);
         return category.Id;
     }
@@ -45,7 +45,7 @@ public class CategoriesRepository(string _connectionString) : ICategoriesReposit
 
                         SELECT 
                         * 
-                        FROM {TableName} 
+                        FROM {TableName}
                         WHERE 
                         IsDeleted = 0 
                         ORDER BY 
@@ -89,10 +89,11 @@ public class CategoriesRepository(string _connectionString) : ICategoriesReposit
                  {TableName}
                   SET 
                   Name = @Name,
-                  IsDeleted = @IsDeleted
+                  ParentCategoryId = @ParentCategoryId,
                   UpdatedDateTime = GETDATE()
                   WHERE
-                  Id = @Id";
+                  Id = @Id
+                  AND IsDeleted = 0";
         int affectedRows = await connection.ExecuteAsync(sql, category);
         return affectedRows == 1;
     }

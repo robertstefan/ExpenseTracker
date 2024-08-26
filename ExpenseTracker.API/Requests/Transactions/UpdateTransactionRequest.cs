@@ -6,7 +6,7 @@ public record UpdateTransactionRequest(string Description,
                                        decimal Amount,
                                        DateTime Date,
                                        Guid CategoryId,
-                                       Guid SubcategoryId,
+                                       Guid UserId,
                                        bool IsRecurrent,
                                        int TransactionType) : ValidationMiddleware
 {
@@ -42,11 +42,6 @@ public record UpdateTransactionRequest(string Description,
         if (CategoryId == Guid.Empty)
         {
             errors[nameof(CategoryId)] = "The category cannot be empty";
-        }
-
-        if (SubcategoryId == Guid.Empty)
-        {
-            errors[nameof(CategoryId)] = "The subcategory cannot be empty";
         }
 
         if (!Enum.IsDefined(typeof(TransactionType), TransactionType))

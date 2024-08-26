@@ -13,7 +13,6 @@ public class TransactionDTO : IEntityDTO
   public bool IsRecurrent { get; set; }
   public string TransactionType { get; set; }
   public CategoryDTO? Category { get; set; }
-  public SubcategoryDTO? Subcategory { get; set; }
   public DateTimeOffset? CreatedDateTime { get; set; }
   public DateTimeOffset? UpdatedDateTime { get; set; }
 
@@ -33,7 +32,6 @@ public class TransactionDTO : IEntityDTO
     CreatedDateTime = transaction.CreatedDateTime;
     UpdatedDateTime = transaction.UpdatedDateTime;
     Category = new CategoryDTO(transaction.Category, transaction.CategoryId);
-    Subcategory = new SubcategoryDTO(transaction.Subcategory, transaction.SubcategoryId);
   }
 
 }

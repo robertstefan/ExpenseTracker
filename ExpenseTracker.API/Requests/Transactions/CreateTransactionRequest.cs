@@ -6,9 +6,9 @@ public record CreateTransactionRequest(string Description,
                                        decimal Amount,
                                        DateTime Date,
                                        Guid CategoryId,
-                                       Guid SubcategoryId,
                                        bool IsRecurrent,
-                                       int TransactionType) : ValidationMiddleware
+                                       int TransactionType,
+                                       Guid UserId) : ValidationMiddleware
 {
     protected override Dictionary<string, string> Validate()
     {
@@ -42,11 +42,6 @@ public record CreateTransactionRequest(string Description,
         if (CategoryId == Guid.Empty)
         {
             errors[nameof(CategoryId)] = "The category cannot be empty";
-        }
-
-        if (SubcategoryId == Guid.Empty)
-        {
-            errors[nameof(CategoryId)] = "The subcategory cannot be empty";
         }
 
         if (IntToEnum.Handle<TransactionType>(TransactionType) == null)

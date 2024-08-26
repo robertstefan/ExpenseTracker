@@ -36,8 +36,8 @@ export const categoryEndpoints = api.enhanceEndpoints({ addTagTypes: ['Category'
 		}),
 		deleteCategory: builder.mutation({
 			query: (id) => ({
-				url: `/categories/${id}`,
-				method: 'DELETE',
+				url: `/categories/delete/${id}`,
+				method: 'POST',
 			}),
 			invalidatesTags: [{ type: 'Category', id: 'LIST' }],
 		}),
@@ -51,3 +51,6 @@ export const {
 	useCreateCategoryMutation,
 	useDeleteCategoryMutation,
 } = categoryEndpoints;
+
+implemented users auth feature, action codes to reset password and change email, login tries and lock out user function
+simplified category logic (moved from category - subcategory logic to parentcategoryid)

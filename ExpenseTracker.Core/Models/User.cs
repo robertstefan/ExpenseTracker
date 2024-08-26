@@ -15,6 +15,8 @@ namespace ExpenseTracker.Core.Models
         public bool LockedOut { get; private set; }
         public short LoginTries { get; private set; }
 
+        public bool IsDeleted { get; private set; }
+
         public DateTimeOffset? CreatedDateTime { get; private set; }
         public DateTimeOffset? UpdatedDateTime { get; private set; }
 
@@ -23,8 +25,15 @@ namespace ExpenseTracker.Core.Models
 
         }
         private User(
-            Guid id, string username, string email, string passwordHash, string lastName, string firstName,
-            bool lockedOut, short loginTries, DateTimeOffset? createdDateTime = null,
+            Guid id,
+            string username,
+            string email,
+            string passwordHash,
+            string lastName,
+            string firstName,
+            bool lockedOut,
+            short loginTries,
+            DateTimeOffset? createdDateTime = null,
             DateTimeOffset? updatedDateTime = null)
         {
             Id = id;
@@ -39,7 +48,12 @@ namespace ExpenseTracker.Core.Models
             UpdatedDateTime = updatedDateTime;
         }
 
-        public static User CreateNew(string username, string email, string passwordHash, string lastName, string firstName)
+        public static User CreateNew(
+            string username,
+            string email,
+            string passwordHash,
+            string lastName,
+            string firstName)
         {
             return new(
                 Guid.NewGuid(),
@@ -52,7 +66,17 @@ namespace ExpenseTracker.Core.Models
                 0
             );
         }
-        public static User Create(Guid id, string username, string email, string passwordHash, string lastName, string firstName, bool lockedOut, short loginTries, DateTimeOffset? createdDateTime = null, DateTimeOffset? updatedDateTime = null)
+        public static User Create(
+            Guid id,
+            string username,
+            string email,
+            string passwordHash,
+            string lastName,
+            string firstName,
+            bool lockedOut,
+            short loginTries,
+            DateTimeOffset? createdDateTime = null,
+            DateTimeOffset? updatedDateTime = null)
         {
             return new(
                 id,

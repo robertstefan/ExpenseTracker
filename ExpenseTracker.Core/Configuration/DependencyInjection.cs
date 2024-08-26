@@ -10,8 +10,9 @@ public static class DependencyInjection
     {
         services.AddScoped<TransactionService>();
         services.AddScoped<CategoryService>();
-        services.AddScoped<SubcategoryService>();
         services.AddScoped<UserService>();
+        services.AddScoped<AuthenticationService>();
+        services.AddScoped<ActionCodeService>();
 
         return services;
     }

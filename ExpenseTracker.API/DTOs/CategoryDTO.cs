@@ -7,7 +7,7 @@ public class CategoryDTO : IEntityDTO
     public Guid Id { get; set; }
     public string Name { get; set; }
     public DateTimeOffset CreatedDateTime { get; set; }
-    public DateTimeOffset UpdatedDateTime { get; set; }
+    public DateTimeOffset? UpdatedDateTime { get; set; }
 
     public CategoryDTO()
     {

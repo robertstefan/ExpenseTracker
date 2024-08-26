@@ -19,11 +19,11 @@ public static class DependencyInjection
         services.AddScoped<ICategoriesRepository, CategoriesRepository>(sp =>
             new CategoriesRepository(configuration.GetConnectionString("DefaultConnection")!));
 
-        services.AddScoped<ISubcategoriesRepository, SubcategoriesRepository>(sp =>
-        new SubcategoriesRepository(configuration.GetConnectionString("DefaultConnection")!));
-
         services.AddScoped<IUserRepository, UserRepository>(sp =>
         new UserRepository(configuration.GetConnectionString("DefaultConnection")!));
+
+        services.AddScoped<IActionCodeRepository, ActionCodeRepository>(sp =>
+        new ActionCodeRepository(configuration.GetConnectionString("DefaultConnection")!));
 
         services.AddAuth(configuration);
 

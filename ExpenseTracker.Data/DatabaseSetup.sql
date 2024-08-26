@@ -11,17 +11,6 @@ CREATE TABLE [dbo].[Categories] (
     PRIMARY KEY CLUSTERED ([Id] ASC)
 );
 
-CREATE TABLE [dbo].[Subcategories] (
-    [Id]              UNIQUEIDENTIFIER   NOT NULL,
-    [Name]            NVARCHAR (255)     NOT NULL,
-    [CreatedDateTime] DATETIMEOFFSET (7) NOT NULL,
-    [UpdatedDateTime] DATETIMEOFFSET (7) NULL,
-    [IsDeleted]       BIT                CONSTRAINT [DEFAULT_Subcategories_IsDeleted] DEFAULT ((0)) NOT NULL,
-    [CategoryId]      UNIQUEIDENTIFIER   NOT NULL,
-    CONSTRAINT [PK_Subcategories] PRIMARY KEY CLUSTERED ([Id] ASC),
-    CONSTRAINT [FK_Subcategories_Categories] FOREIGN KEY ([CategoryId]) REFERENCES [dbo].[Categories] ([Id])
-);
-
 CREATE TABLE [dbo].[Transactions] (
     [Id]              UNIQUEIDENTIFIER   NOT NULL,
     [Description]     NVARCHAR (255)     DEFAULT ('') NOT NULL,
@@ -34,75 +23,25 @@ CREATE TABLE [dbo].[Transactions] (
     [UpdatedDateTime] DATETIMEOFFSET (7) NULL,
     [SubcategoryId]   UNIQUEIDENTIFIER   NOT NULL,
     [IsDeleted]       BIT                CONSTRAINT [DEFAULT_Transactions_IsDeleted] DEFAULT ((0)) NOT NULL,
+    [UserId]          UNIQUEIDENTIFIER   NOT NULL
     PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_Transactions_Categories] FOREIGN KEY ([CategoryId]) REFERENCES [dbo].[Categories] ([Id]),
     CONSTRAINT [FK_Transactions_Subcategories] FOREIGN KEY ([SubcategoryId]) REFERENCES [dbo].[Subcategories] ([Id])
 );
 
--- =============================================
--- Author:      Andrei Popescu
--- Create date: 15.08.2024, 02:26AM
--- Description: Creates a transaction and verifies that the specified subcategory belongs to the given category, ensuring data consistency.
--- Parameters:
---   @Id               - The unique identifier for the transaction. This is a primary key and should be a GUID.
---                       Type: UNIQUEIDENTIFIER
---
---   @Description      - A brief description of the transaction. This typically explains the nature or purpose of the transaction.
---                       Type: NVARCHAR(255)
---
---   @Amount           - The monetary amount of the transaction. The value is stored with up to two decimal places.
---                       Type: DECIMAL(18,2)
---
---   @Date             - The date and time when the transaction occurred.
---                       Type: DATETIME
---
---   @CategoryId       - The unique identifier for the category associated with the transaction. This is a foreign key reference.
---                       Type: UNIQUEIDENTIFIER
---
---   @SubcategoryId    - The unique identifier for the subcategory associated with the transaction. This is a foreign key reference.
---                       Type: UNIQUEIDENTIFIER
---
---   @IsRecurrent      - Indicates whether the transaction is recurrent. 
---                       1 (TRUE) if recurrent, 0 (FALSE) if not.
---                       Type: BIT
---
---   @TransactionType  - An integer representing the type of transaction (e.g., income, expense).
---                       Type: INT
--- Returns:    Number of affected rows or an error message if the subcategory does not belong to the specified category.
--- =============================================
-
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-CREATE PROCEDURE [dbo].[CreateTransaction]
-    @Id UNIQUEIDENTIFIER, 
-    @Description NVARCHAR(255), 
-    @Amount DECIMAL(18,2), 
-    @Date DATETIME, 
-    @CategoryId UNIQUEIDENTIFIER, 
-    @SubcategoryId UNIQUEIDENTIFIER, 
-    @IsRecurrent BIT, 
-    @TransactionType INT
-AS
-BEGIN
-    IF EXISTS (SELECT 1 
-               FROM Subcategories 
-               WHERE Id = @SubcategoryId 
-               AND CategoryId = @CategoryId)
-    --Should be a single row containing a categoryId and Id(SubcategoryId).
-    --Duplicates are prevented by primary key constraints
-    BEGIN
-        INSERT INTO Transactions (Id, Description, Amount, Date, CategoryId, SubcategoryId, IsRecurrent, TransactionType, CreatedDateTime)
-        VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @SubcategoryId, @IsRecurrent, @TransactionType, GETDATE());
-    END
-    ELSE
-    BEGIN
-        PRINT 'Subcategory does not exist in the specified category. Transaction not inserted.';
-    END
-END
-GO
-
+CREATE TABLE [dbo].[Users] (
+    [Id]           INT                IDENTITY (1, 1) NOT NULL,
+    [Username]     NVARCHAR (100)     NOT NULL,
+    [Email]        NVARCHAR (100)     NOT NULL,
+    [PasswordHash] NVARCHAR (100)     NOT NULL,
+    [CreateDate]   DATETIMEOFFSET (7) NOT NULL,
+    [UpdateDate]   DATETIMEOFFSET (7) NULL,
+    [LastName]     NVARCHAR (20)      NOT NULL,
+    [FirstName]    NVARCHAR (20)      NOT NULL,
+    [LockedOut]    BIT                CONSTRAINT [DEFAULT_Users_LockedOut] DEFAULT ((0)) NOT NULL,
+    [LoginTries]   SMALLINT           CONSTRAINT [DEFAULT_Users_LoginTies] DEFAULT ((0)) NOT NULL,
+    CONSTRAINT [PK_Users] PRIMARY KEY CLUSTERED ([Id] ASC)
+);
 -- ===========================================================================================
 -- Author:      Andrei Popescu
 -- Create date: 15.08.2024, 02:26AM
@@ -186,180 +125,29 @@ BEGIN
 END;
 GO
 
--- =============================================
--- Author:        Andrei Popescu
--- Create date:   15.08.2024, 02:45AM
--- Description:   Updates the details of a subcategory, including its name and associated category.
---                If the category association is changed, it also updates all related transactions
---                to ensure they reflect the new category.
--- Parameters:
---   @Id               - The unique identifier for the subcategory to be updated. This is a primary key and should be a GUID.
---                       Type: UNIQUEIDENTIFIER
---
---   @Name             - The new name for the subcategory.
---                       Type: NVARCHAR(255)
---
---   @CategoryId       - The unique identifier for the new category associated with the subcategory. 
---                       This is a foreign key reference to the Categories table.
---                       Type: UNIQUEIDENTIFIER
--- Returns:    Number of affected rows
--- =============================================
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
 
-CREATE PROCEDURE [dbo].[UpdateSubcategory]
-    @Id UNIQUEIDENTIFIER,
-    @Name NVARCHAR(255),
-    @CategoryId UNIQUEIDENTIFIER
+CREATE OR ALTER PROCEDURE dbo.RemoveUser
+  @userId INT,
+  @softDelete BIT
 AS
 BEGIN
-    -- Declare variable to hold the current CategoryId associated with the Subcategory
-    DECLARE @OldCategoryId UNIQUEIDENTIFIER
+  BEGIN TRANSACTION;
 
-    -- Retrieve the current CategoryId associated with the Subcategory
-    SELECT @OldCategoryId = CategoryId
-    FROM [Subcategories]
-    WHERE Id = @Id
-
-    -- Update the Subcategory details
-    UPDATE [Subcategories] SET
-        Name = @Name,
-        CategoryId = @CategoryId,
-        UpdatedDateTime = GETDATE()
-    WHERE Id = @Id
-
-    -- If the CategoryId has changed, update all related Transactions
-    IF @OldCategoryId <> @CategoryId
+  BEGIN TRY
+    IF (@softDelete = 0)
     BEGIN
-        UPDATE [Transactions] SET
-            CategoryId = @CategoryId,
-            UpdatedDateTime = GETDATE()
-        WHERE SubcategoryId = @Id
-    END
-END
-GO
-
--- =============================================
--- Author:        Popescu Andrei
--- Create date:   15.08.2024, 02:55AM
--- Description:   Updates the details of an existing transaction in the database. 
---                Before updating, the procedure verifies that the specified subcategory 
---                belongs to the specified category to ensure data consistency.
--- Parameters:
---   @Id               - The unique identifier for the transaction. This is a primary key and should be a GUID.
---                       Type: UNIQUEIDENTIFIER
---
---   @Description      - A brief description of the transaction. This typically explains the nature or purpose of the transaction.
---                       Type: NVARCHAR(255)
---
---   @Amount           - The monetary amount of the transaction. The value is stored with up to two decimal places.
---                       Type: DECIMAL(18,2)
---
---   @Date             - The date and time when the transaction occurred.
---                       Type: DATETIME
---
---   @CategoryId       - The unique identifier for the category associated with the transaction. This is a foreign key reference.
---                       Type: UNIQUEIDENTIFIER
---
---   @SubcategoryId    - The unique identifier for the subcategory associated with the transaction. This is a foreign key reference.
---                       Type: UNIQUEIDENTIFIER
---
---   @IsRecurrent      - Indicates whether the transaction is recurrent. 
---                       1 (TRUE) if recurrent, 0 (FALSE) if not.
---                       Type: BIT
---
---   @TransactionType  - An integer representing the type of transaction (e.g., income, expense).
---                       Type: INT
--- Returns:    Number of affected rows or an error message if the subcategory does not belong to the specified category.
--- =============================================
-SET ANSI_NULLS ON
-GO
-SET QUOTED_IDENTIFIER ON
-GO
-
-CREATE PROCEDURE [dbo].[UpdateTransaction]
-    @Id UNIQUEIDENTIFIER, 
-    @Description NVARCHAR(255), 
-    @Amount DECIMAL(18,2), 
-    @Date DATETIME, 
-    @CategoryId UNIQUEIDENTIFIER, 
-    @SubcategoryId UNIQUEIDENTIFIER, 
-    @IsRecurrent BIT, 
-    @TransactionType INT
-AS
-BEGIN
-    -- Check if the specified subcategory belongs to the specified category
-    IF EXISTS (SELECT 1 
-               FROM Subcategories 
-               WHERE Id = @SubcategoryId 
-               AND CategoryId = @CategoryId)
-    BEGIN
-        -- Update the transaction with the provided details
-        UPDATE Transactions SET 
-            Description = @Description,
-            Amount = @Amount,
-            Date = @Date,
-            CategoryId = @CategoryId,
-            SubcategoryId = @SubcategoryId,
-            IsRecurrent = @IsRecurrent,
-            TransactionType = @TransactionType,
-            UpdatedDateTime = GETDATE()
-        WHERE ID = @Id
+      DELETE FROM [Transactions] WHERE UserId = @userId;
+      DELETE FROM [Users] WHERE Id = @userId;
     END
     ELSE
     BEGIN
-        -- Output a message if the subcategory does not match the category
-        PRINT 'Subcategory does not exist in the specified category. Transaction not updated.';
+      UPDATE [Transactions] SET IsDeleted = 1 WHERE UserId = @userId;
+      UPDATE [Users] SET IsDeleted = 1 WHERE Id = @userId;
     END
+    COMMIT TRANSACTION;
+  END TRY
+  BEGIN CATCH
+    ROLLBACK TRANSACTION;
+    THROW;
+  END CATCH
 END
-GO
-
--- =============================================
--- Author:        Popescu Andrei
--- Create date:   15.08.2024, 02:55AM
--- Description: This trigger is intended to handle transaction updates by first updating all relevant fields. 
--- It then checks if the subcategory has been modified and verifies its association with the category. If the subcategory is not a 
--- valid child of the category, the trigger should roll back all changes to ensure data integrity. However, the trigger is not 
--- functioning as expected, which is why an alternative stored procedure is being used. (Update Transaction SP)
--- Expected Behaviour: On updating a transaction, all fields should be updated initially. If the subcategory is modified, 
--- its relationship with the category should be validated. If the subcategory does not belong to the category, the transaction should 
--- be a atomic one and rollback if a single error occured.
--- Current Behaviour: I don't even know honestly but I think I'm onto something.
--- =============================================
-
-
--- CREATE TRIGGER TRG_TRANSACTIONS_UPDATE_InsteadOf
--- ON [Transactions]
--- INSTEAD OF UPDATE
--- AS
--- BEGIN
---     SET NOCOUNT ON
-
---     IF EXISTS (
---         SELECT 1
---         FROM INSERTED i
---         JOIN DELETED d ON i.Id = d.Id
---         WHERE i.SubcategoryId <> d.SubcategoryId
---     )
---     BEGIN
---         UPDATE t
---         SET
---             t.Description = i.Description,
---             t.Amount = i.Amount,
---             t.Date = i.Date,
---             t.CategoryId = i.CategoryId,
---             t.SubcategoryId = i.SubcategoryId,
---             t.IsRecurrent = i.IsRecurrent,
---             t.TransactionType = i.TransactionType
---         FROM [Transactions] t
---         JOIN INSERTED i on t.Id = i.Id;
---     END
---     ELSE
---     BEGIN
---         RAISERROR('Subcategory does not match the specified Category. Updated operation halted',16,1);
---         ROLLBACK TRANSACTION
---     END;
--- END;
-
