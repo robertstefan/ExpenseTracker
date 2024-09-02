@@ -19,12 +19,13 @@ public class UserRepository : IUserRepository
   public async Task<int> CreateUserAsync(User user)
   {
     using var connection = new SqlConnection(_connectionString);
-    var sql = $@"INSERT INTO 
-                        {TableName} 
-                        (Username, Email, PasswordHash, CreateDate, FirstName, LastName)
-                        VALUES 
-                        (@Username, @Email, @Hash, GETDATE(), @FirstName, @LastName)
-                      SELECT @@IDENTITY() AS Id";
+    var sql = $@"
+        INSERT INTO {TableName} 
+        (Username, Email, PasswordHash, CreateDate, FirstName, LastName)
+        VALUES 
+        (@Username, @Email, @PasswordHash, GETDATE(), @FirstName, @LastName);
+        SELECT CAST(SCOPE_IDENTITY() as int);";
+    
     var id = await connection.ExecuteScalarAsync<int>(sql, user);
 
     return id;
