@@ -1,15 +1,16 @@
 CREATE TABLE Categories
 (
-    Id INT IDENTITY(1,1) PRIMARY KEY,
+    Id   INT IDENTITY(1,1) PRIMARY KEY,
     Name NVARCHAR(50) NOT NULL
 );
 
 ALTER TABLE Transactions
-ADD CategoryId INT;
+    ADD CategoryId INT;
 
 ALTER TABLE Transactions
-DROP COLUMN Category;
+DROP
+COLUMN Category;
 
 ALTER TABLE Transactions
-ADD CONSTRAINT FK_Transactions_Categories
-FOREIGN KEY (CategoryId) REFERENCES Categories(Id);
+    ADD CONSTRAINT FK_Transactions_Categories
+        FOREIGN KEY (CategoryId) REFERENCES Categories (Id);

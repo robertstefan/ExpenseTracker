@@ -1,7 +1,6 @@
 ﻿using ExpenseTracker.API.DTOs;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
-
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -21,20 +20,17 @@ public class ExpensesController : ControllerBase
   [Route("list")]
   public async Task<ActionResult<ExpenseDTO>> GetExpenses()
   {
-    List<Expense> expenses = (await _expenseService.GetAllExpensesAsync()).ToList();
+    var expenses = (await _expenseService.GetAllExpensesAsync()).ToList();
 
-    if (expenses == null)
+    if (expenses == null) return Ok(Enumerable.Empty<ExpenseDTO>());
+
+    var result = new List<ExpenseDTO>();
+
+    for (var i = 0; i < expenses.Count; i++)
     {
-      return Ok(Enumerable.Empty<ExpenseDTO>());
-    }
+      var item = expenses[i];
 
-    List<ExpenseDTO> result = new List<ExpenseDTO>();
-
-    for (int i = 0; i < expenses.Count; i++)
-    {
-      Expense item = expenses[i];
-
-      result.Add(new ExpenseDTO()
+      result.Add(new ExpenseDTO
       {
         Id = item.Id,
         Amount = item.Amount,
@@ -53,18 +49,19 @@ public class ExpensesController : ControllerBase
   {
     var expense = await _expenseService.GetExpenseByIdAsync(id);
 
-    if (expense == null)
-    {
-      return NotFound();
-    }
+    if (expense == null) return NotFound();
 
-    return new ExpenseDTO() { Id = expense.Id, Amount = expense.Amount, Category = expense.Category, Date = expense.Date, Description = expense.Description };
+    return new ExpenseDTO
+    {
+      Id = expense.Id, Amount = expense.Amount, Category = expense.Category, Date = expense.Date,
+      Description = expense.Description
+    };
   }
 
   [HttpPost]
   public async Task<ActionResult<Guid>> CreateExpense(ExpenseDTO expenseDto)
   {
-    var expense = new Expense()
+    var expense = new Expense
     {
       Id = expenseDto.Id,
       Amount = expenseDto.Amount,
@@ -81,12 +78,9 @@ public class ExpensesController : ControllerBase
   [HttpPut]
   public async Task<ActionResult<Expense>> UpdateExpense(Guid id, ExpenseDTO expenseDto)
   {
-    if (id != expenseDto.Id)
-    {
-      return BadRequest();
-    }
+    if (id != expenseDto.Id) return BadRequest();
 
-    var expense = new Expense()
+    var expense = new Expense
     {
       Id = expenseDto.Id,
       Amount = expenseDto.Amount,

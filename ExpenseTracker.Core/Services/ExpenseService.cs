@@ -9,31 +9,31 @@ public class ExpenseService
 
   public ExpenseService(IExpenseRepository expenseRepository)
   {
-      _expenseRepository = expenseRepository;
-    }
+    _expenseRepository = expenseRepository;
+  }
 
   public async Task<Guid> AddExpenseAsync(Expense expense)
   {
-      return await _expenseRepository.AddExpenseAsync(expense);
-    }
+    return await _expenseRepository.AddExpenseAsync(expense);
+  }
 
   public async Task<IEnumerable<Expense>> GetAllExpensesAsync()
   {
-      return await _expenseRepository.GetAllExpensesAsync();
-    }
+    return await _expenseRepository.GetAllExpensesAsync();
+  }
 
   public async Task<Expense> GetExpenseByIdAsync(Guid id)
   {
-      return await _expenseRepository.GetExpenseByIdAsync(id);
-    }
+    return await _expenseRepository.GetExpenseByIdAsync(id);
+  }
 
   public async Task UpdateExpenseAsync(Expense expense)
   {
-      throw new NotImplementedException();
-    }
+    throw new NotImplementedException();
+  }
 
   public async Task DeleteExpenseAsync(Guid id)
   {
-      throw new NotImplementedException();
-    }
+    throw new NotImplementedException();
+  }
 }

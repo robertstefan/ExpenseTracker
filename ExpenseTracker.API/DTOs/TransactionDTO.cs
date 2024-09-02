@@ -22,5 +22,4 @@ public class TransactionDTO
 
   public int CategoryId { get; set; }
   public int SubcategoryId { get; set; }
-
 }

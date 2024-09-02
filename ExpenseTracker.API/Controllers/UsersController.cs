@@ -1,8 +1,7 @@
+using ExpenseTracker.API.DTOs;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
-using ExpenseTracker.API.DTOs;
 using Microsoft.AspNetCore.Mvc;
-
 
 namespace ExpenseTracker.API.Controllers;
 
@@ -13,7 +12,7 @@ public class UsersController(UserService _userService, ILogger<UsersController> 
   [HttpPost("update/{userId}")]
   public async Task<ActionResult<User>> Update(UserDTO user, int userId)
   {
-    User? _user = await _userService.GetUserById(userId);
+    var _user = await _userService.GetUserById(userId);
 
     if (user == null) return BadRequest("Wrong user identifier");
 

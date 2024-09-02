@@ -2,5 +2,5 @@
 
 public class IdOnlyResponse
 {
-  public Object Id { get; set; }
+  public object Id { get; set; }
 }

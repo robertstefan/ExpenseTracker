@@ -1,3 +1,4 @@
+using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using ExpenseTracker.Core.Interfaces;
@@ -18,7 +19,7 @@ public class UserRepository : IUserRepository
   public async Task<int> CreateUserAsync(User user)
   {
     using var connection = new SqlConnection(_connectionString);
-    string sql = $@"INSERT INTO 
+    var sql = $@"INSERT INTO 
                         {TableName} 
                         (Username, Email, PasswordHash, CreateDate, FirstName, LastName)
                         VALUES 
@@ -32,7 +33,7 @@ public class UserRepository : IUserRepository
   public async Task<IEnumerable<User>> GetAllUsersAsync()
   {
     using var connection = new SqlConnection(_connectionString);
-    string sql = $"SELECT Id, Username, Email, FirstName, LastName FROM {TableName}";
+    var sql = $"SELECT Id, Username, Email, FirstName, LastName FROM {TableName}";
     var users = await connection.QueryAsync<User?>(sql);
 
     return users;
@@ -41,7 +42,7 @@ public class UserRepository : IUserRepository
   public async Task<User?> GetUserByEmail(string email)
   {
     using var connection = new SqlConnection(_connectionString);
-    string sql = $@"SELECT Id, Username, Email, PasswordHash, FirstName, LastName, LockedOut, LoginTries 
+    var sql = $@"SELECT Id, Username, Email, PasswordHash, FirstName, LastName, LockedOut, LoginTries 
                         FROM {TableName} 
                       WHERE Email = @Email";
     var user = await connection.QuerySingleAsync<User?>(sql, new { Email = email });
@@ -52,7 +53,7 @@ public class UserRepository : IUserRepository
   public async Task<User?> GetUserById(int id)
   {
     using var connection = new SqlConnection(_connectionString);
-    string sql = $@"SELECT Id, Username, Email, PasswordHash, FirstName, LastName, LockedOut, LoginTries 
+    var sql = $@"SELECT Id, Username, Email, PasswordHash, FirstName, LastName, LockedOut, LoginTries 
                         FROM {TableName} 
                       WHERE Id = @Id";
     var user = await connection.QuerySingleAsync<User?>(sql, new { Id = id });
@@ -66,7 +67,7 @@ public class UserRepository : IUserRepository
 
     user.UpdateDate = DateTime.Now;
 
-    string sql = $@"UPDATE [Users] SET
+    var sql = @"UPDATE [Users] SET
                       Email = @Email,
                       Username = @Username,
                       PasswordHash = @PasswordHash,
@@ -78,14 +79,14 @@ public class UserRepository : IUserRepository
 
     return user;
   }
-  
+
   public async Task<bool> RemoveUserAsync(int userId)
   {
     using var connection = new SqlConnection(_connectionString);
 
-    string userSql = $"DELETE FROM {TableName} WHERE Id = @Id";
-    int affected = await connection.ExecuteAsync(userSql, new { Id = userId },
-      commandType: System.Data.CommandType.StoredProcedure);
+    var userSql = $"DELETE FROM {TableName} WHERE Id = @Id";
+    var affected = await connection.ExecuteAsync(userSql, new { Id = userId },
+      commandType: CommandType.StoredProcedure);
 
     return affected > 0;
   }

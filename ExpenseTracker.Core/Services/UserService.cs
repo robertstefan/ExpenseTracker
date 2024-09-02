@@ -24,16 +24,9 @@ public class UserService
 
   public async Task<bool> RemoveUser(int userId)
   {
-    try
-    {
-      var res = await _userRepository.RemoveUserAsync(userId);
+    var res = await _userRepository.RemoveUserAsync(userId);
 
-      return res;
-    }
-    catch (Exception ex)
-    {
-      throw;
-    }
+    return res;
   }
 
   public async Task<User> UpdateUserAsync(User user)

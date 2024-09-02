@@ -9,36 +9,36 @@ public class TransactionService
 
   public TransactionService(ITransactionRepository transactionRepository)
   {
-      _transactionRepository = transactionRepository;
-    }
+    _transactionRepository = transactionRepository;
+  }
 
   public async Task<Guid> AddTransactionAsync(Transaction transaction)
   {
-      return await _transactionRepository.AddTransactionAsync(transaction);
-    }
+    return await _transactionRepository.AddTransactionAsync(transaction);
+  }
 
   public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
   {
-      return await _transactionRepository.GetTransactionByIdAsync(transactionId);
-    }
+    return await _transactionRepository.GetTransactionByIdAsync(transactionId);
+  }
 
   public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
   {
-      return await _transactionRepository.GetAllTransactionsAsync();
-    }
+    return await _transactionRepository.GetAllTransactionsAsync();
+  }
 
   public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
   {
-      return await _transactionRepository.UpdateTransactionAsync(transaction);
-    }
+    return await _transactionRepository.UpdateTransactionAsync(transaction);
+  }
 
   public async Task<bool> DeleteTransactionAsync(Guid transactionId)
   {
-      return await _transactionRepository.DeleteTransactionAsync(transactionId);
-    }
+    return await _transactionRepository.DeleteTransactionAsync(transactionId);
+  }
 
   public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType type)
   {
-      return await _transactionRepository.GetTransactionsByTypeAsync(type);
-    }
+    return await _transactionRepository.GetTransactionsByTypeAsync(type);
+  }
 }

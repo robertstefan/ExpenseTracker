@@ -9,31 +9,31 @@ public class CategoryService
 
   public CategoryService(ICategoryRepository categoryRepository)
   {
-      _categoryRepository = categoryRepository;
-    }
+    _categoryRepository = categoryRepository;
+  }
 
   public async Task<int> AddCategoryAsync(Category category)
   {
-      return await _categoryRepository.AddCategoryAsync(category);
-    }
+    return await _categoryRepository.AddCategoryAsync(category);
+  }
 
   public async Task<Category> GetCategoryByIdAsync(int categoryId)
   {
-      return await _categoryRepository.GetCategoryByIdAsync(categoryId);
-    }
+    return await _categoryRepository.GetCategoryByIdAsync(categoryId);
+  }
 
   public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
   {
-      return await _categoryRepository.GetAllCategoriesAsync();
-    }
+    return await _categoryRepository.GetAllCategoriesAsync();
+  }
 
   public async Task<Category?> UpdateCategoryAsync(Category category)
   {
-      return await _categoryRepository.UpdateCategoryAsync(category);
-    }
+    return await _categoryRepository.UpdateCategoryAsync(category);
+  }
 
   public async Task<bool> DeleteCategoryAsync(int categoryId)
   {
-      return await _categoryRepository.DeleteCategoryAsync(categoryId);
-    }
+    return await _categoryRepository.DeleteCategoryAsync(categoryId);
+  }
 }

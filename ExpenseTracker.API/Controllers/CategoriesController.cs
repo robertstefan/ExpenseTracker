@@ -29,10 +29,7 @@ public class CategoriesController : ControllerBase
   {
     var category = await _categoryService.GetCategoryByIdAsync(id);
 
-    if (category == null)
-    {
-      return NotFound();
-    }
+    if (category == null) return NotFound();
 
     return Ok(category);
   }
@@ -42,14 +39,8 @@ public class CategoriesController : ControllerBase
   public async Task<ActionResult<int>> AddCategory(Category category)
   {
     // No need for dto since i am not using the user given id in the repo, just ignoring it
-    if (category == null )
-    {
-      return BadRequest();
-    }
-    if (string.IsNullOrWhiteSpace(category.Name))
-    {
-      return BadRequest("Category name cannot be empty");
-    }
+    if (category == null) return BadRequest();
+    if (string.IsNullOrWhiteSpace(category.Name)) return BadRequest("Category name cannot be empty");
 
     int categoryId;
 
@@ -64,28 +55,19 @@ public class CategoriesController : ControllerBase
       return BadRequest("Could not create the category");
     }
 
-    return Ok(new IdOnlyResponse() { Id = categoryId });
+    return Ok(new IdOnlyResponse { Id = categoryId });
   }
 
   [HttpPut]
   [Route("update")]
   public async Task<ActionResult<Category>> UpdateCategory(Category category)
   {
-    if (category == null)
-    {
-      return BadRequest();
-    }
-    if (string.IsNullOrWhiteSpace(category.Name))
-    {
-      return BadRequest("Category name cannot be empty");
-    }
+    if (category == null) return BadRequest();
+    if (string.IsNullOrWhiteSpace(category.Name)) return BadRequest("Category name cannot be empty");
 
     var updatedCategory = await _categoryService.UpdateCategoryAsync(category);
 
-    if (updatedCategory == null)
-    {
-      return NotFound();
-    }
+    if (updatedCategory == null) return NotFound();
 
     return Ok(updatedCategory);
   }
@@ -96,10 +78,7 @@ public class CategoriesController : ControllerBase
   {
     var success = await _categoryService.DeleteCategoryAsync(id);
 
-    if (!success)
-    {
-      return NotFound();
-    }
+    if (!success) return NotFound();
 
     return Ok();
   }

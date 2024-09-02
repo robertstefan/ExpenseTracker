@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ExpenseTracker.Core.Models;
+﻿using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.Core.Interfaces;
 

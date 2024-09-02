@@ -1,7 +1,5 @@
 ﻿using System.Data.SqlClient;
-
 using Dapper;
-
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
@@ -13,41 +11,41 @@ public class ExpenseRepository : IExpenseRepository
 
   public ExpenseRepository(string connectionString)
   {
-      _connectionString = connectionString;
-    }
+    _connectionString = connectionString;
+  }
 
   public async Task<Guid> AddExpenseAsync(Expense expense)
   {
-      using var connection = new SqlConnection(_connectionString);
-      var sql = @"INSERT INTO Expenses (Id, Description, Amount, Date, Category)
+    using var connection = new SqlConnection(_connectionString);
+    var sql = @"INSERT INTO Expenses (Id, Description, Amount, Date, Category)
                         VALUES (@Id, @Description, @Amount, @Date, @Category)";
 
-      await connection.ExecuteAsync(sql, expense);
+    await connection.ExecuteAsync(sql, expense);
 
-      return expense.Id;
-    }
-
-  public Task DeleteExpenseAsync(Guid id)
-  {
-      throw new NotImplementedException();
-    }
+    return expense.Id;
+  }
 
   public async Task<IEnumerable<Expense>> GetAllExpensesAsync()
   {
-      using var connection = new SqlConnection(_connectionString);
+    using var connection = new SqlConnection(_connectionString);
 
-      return await connection.QueryAsync<Expense>("SELECT * FROM Expenses");
-    }
+    return await connection.QueryAsync<Expense>("SELECT * FROM Expenses");
+  }
 
   public async Task<Expense> GetExpenseByIdAsync(Guid id)
   {
-      using var connection = new SqlConnection(_connectionString);
+    using var connection = new SqlConnection(_connectionString);
 
-      return await connection.QueryFirstAsync<Expense>("SELECT * FROM Expenses WHERE Id = @Id", new { Id = id });
-    }
+    return await connection.QueryFirstAsync<Expense>("SELECT * FROM Expenses WHERE Id = @Id", new { Id = id });
+  }
+
+  public Task DeleteExpenseAsync(Guid id)
+  {
+    throw new NotImplementedException();
+  }
 
   public Task UpdateExpenseAsync(Expense expense)
   {
-      throw new NotImplementedException();
-    }
+    throw new NotImplementedException();
+  }
 }
