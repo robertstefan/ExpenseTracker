@@ -25,7 +25,7 @@ namespace ExpenseTracker.API.Controllers
     }
 
     [HttpGet]
-    [Route(":id")]
+    [Route("{id}")]
     public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
     {      
       var transaction = await _transactionService.GetTransactionByIdAsync(id);
@@ -110,7 +110,7 @@ namespace ExpenseTracker.API.Controllers
     }
 
     [HttpDelete]
-    [Route("delete/:id")]
+    [Route("delete/{id}")]
     public async Task<IActionResult> DeleteTransaction(Guid Id)
     {
       var succes = await _transactionService.DeleteTransactionAsync(Id);

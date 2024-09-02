@@ -24,7 +24,7 @@ namespace ExpenseTracker.API.Controllers
     }
 
     [HttpGet]
-    [Route(":id")]
+    [Route("{id}")]
     public async Task<ActionResult<Category>> GetCategory(int id)
     {
       var category = await _categoryService.GetCategoryByIdAsync(id);
