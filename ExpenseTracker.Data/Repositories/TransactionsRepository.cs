@@ -3,20 +3,20 @@ using Dapper;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
-namespace ExpenseTracker.Data.Repositories
-{
-  public class TransactionsRepository : ITransactionRepository
-  {
-    private readonly string _connectionString;
-    private string TableName => "[Transactions]";
+namespace ExpenseTracker.Data.Repositories;
 
-    public TransactionsRepository(string connectionString)
-    {
+public class TransactionsRepository : ITransactionRepository
+{
+  private readonly string _connectionString;
+  private string TableName => "[Transactions]";
+
+  public TransactionsRepository(string connectionString)
+  {
       _connectionString = connectionString;
     }
 
-    public async Task<Guid> AddTransactionAsync(Transaction transaction)
-    {
+  public async Task<Guid> AddTransactionAsync(Transaction transaction)
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"INSERT INTO {TableName} 
                                 (Id, Description, Amount, Date, CategoryId, SubcategoryId, IsRecurrent, TransactionType)
@@ -27,8 +27,8 @@ namespace ExpenseTracker.Data.Repositories
       return transaction.Id;
     }
 
-    public async Task<bool> DeleteTransactionAsync(Guid transactionId)
-    {
+  public async Task<bool> DeleteTransactionAsync(Guid transactionId)
+  {
       using var conn = new SqlConnection(_connectionString);
 
       var query = $"DELETE FROM {TableName} WHERE Id = @Id; SELECT @@ROWCOUNT AS Affected";
@@ -38,8 +38,8 @@ namespace ExpenseTracker.Data.Repositories
       return affectedRows == 1;
     }
 
-    public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
-    {
+  public async Task<IEnumerable<Transaction>> GetAllTransactionsAsync()
+  {
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"SELECT 
@@ -71,8 +71,8 @@ namespace ExpenseTracker.Data.Repositories
       );
     }
 
-    public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
-    {
+  public async Task<Transaction> GetTransactionByIdAsync(Guid transactionId)
+  {
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"SELECT 
@@ -108,8 +108,8 @@ namespace ExpenseTracker.Data.Repositories
       return result.FirstOrDefault();
     }
 
-    public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType type)
-    {
+  public async Task<IEnumerable<Transaction>> GetTransactionsByTypeAsync(TransactionType type)
+  {
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"SELECT 
@@ -143,8 +143,8 @@ namespace ExpenseTracker.Data.Repositories
       );
     }
 
-    public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
-    {
+  public async Task<Transaction?> UpdateTransactionAsync(Transaction transaction)
+  {
       using var conn = new SqlConnection(_connectionString);
 
       var query = $@"UPDATE {TableName}
@@ -167,5 +167,4 @@ namespace ExpenseTracker.Data.Repositories
 
       return transaction;
     }
-  }
 }

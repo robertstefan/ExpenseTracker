@@ -3,30 +3,30 @@ using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTracker.API.Controllers
-{
-  [Route("api/subcategories")]
-  [ApiController]
-  public class SubcategoriesController : ControllerBase
-  {
-    private readonly SubcategoryService _subcategoryService;
+namespace ExpenseTracker.API.Controllers;
 
-    public SubcategoriesController(SubcategoryService subcategoryService)
-    {
+[Route("api/subcategories")]
+[ApiController]
+public class SubcategoriesController : ControllerBase
+{
+  private readonly SubcategoryService _subcategoryService;
+
+  public SubcategoriesController(SubcategoryService subcategoryService)
+  {
       _subcategoryService = subcategoryService;
     }
 
-    [HttpGet]
-    [Route("list-all")]
-    public async Task<ActionResult<List<Subcategory>>> GetAllSubcategories()
-    {
+  [HttpGet]
+  [Route("list-all")]
+  public async Task<ActionResult<List<Subcategory>>> GetAllSubcategories()
+  {
       return (await _subcategoryService.GetAllSubcategoriesAsync()).ToList();
     }
 
-    [HttpGet]
-    [Route("{id}")]
-    public async Task<ActionResult<Subcategory>> GetSubcategory(int id)
-    {
+  [HttpGet]
+  [Route("{id}")]
+  public async Task<ActionResult<Subcategory>> GetSubcategory(int id)
+  {
       var subcategory = await _subcategoryService.GetSubcategoryByIdAsync(id);
 
       if (subcategory == null)
@@ -37,10 +37,10 @@ namespace ExpenseTracker.API.Controllers
       return Ok(subcategory);
     }
 
-    [HttpGet]
-    [Route("by-category/{categoryId}")]
-    public async Task<ActionResult<List<Subcategory>>> GetSubcategoriesByCategoryId(int categoryId)
-    {
+  [HttpGet]
+  [Route("by-category/{categoryId}")]
+  public async Task<ActionResult<List<Subcategory>>> GetSubcategoriesByCategoryId(int categoryId)
+  {
       var subcategories = await _subcategoryService.GetSubcategoriesByCategoryIdAsync(categoryId);
 
       if (!subcategories.Any())
@@ -51,10 +51,10 @@ namespace ExpenseTracker.API.Controllers
       return Ok(subcategories.ToList());
     }
 
-    [HttpPost]
-    [Route("create")]
-    public async Task<ActionResult<int>> AddSubcategory(Subcategory subcategory)
-    {
+  [HttpPost]
+  [Route("create")]
+  public async Task<ActionResult<int>> AddSubcategory(Subcategory subcategory)
+  {
       if (subcategory == null || string.IsNullOrWhiteSpace(subcategory.Name))
       {
         return BadRequest("Subcategory name cannot be empty");
@@ -76,10 +76,10 @@ namespace ExpenseTracker.API.Controllers
       return Ok(new IdOnlyResponse() { Id = subcategoryId });
     }
 
-    [HttpPut]
-    [Route("update")]
-    public async Task<ActionResult<Subcategory>> UpdateSubcategory(Subcategory subcategory)
-    {
+  [HttpPut]
+  [Route("update")]
+  public async Task<ActionResult<Subcategory>> UpdateSubcategory(Subcategory subcategory)
+  {
       if (subcategory == null || string.IsNullOrWhiteSpace(subcategory.Name))
       {
         return BadRequest("Subcategory name cannot be empty");
@@ -95,10 +95,10 @@ namespace ExpenseTracker.API.Controllers
       return Ok(updatedSubcategory);
     }
 
-    [HttpDelete]
-    [Route("delete/{id}")]
-    public async Task<IActionResult> DeleteSubcategory(int id)
-    {
+  [HttpDelete]
+  [Route("delete/{id}")]
+  public async Task<IActionResult> DeleteSubcategory(int id)
+  {
       var success = await _subcategoryService.DeleteSubcategoryAsync(id);
 
       if (!success)
@@ -108,5 +108,4 @@ namespace ExpenseTracker.API.Controllers
 
       return Ok();
     }
-  }
 }

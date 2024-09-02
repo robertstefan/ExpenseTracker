@@ -4,100 +4,99 @@ using ExpenseTracker.Core.Services;
 
 using Microsoft.AspNetCore.Mvc;
 
-namespace ExpenseTracker.API.Controllers
+namespace ExpenseTracker.API.Controllers;
+
+[ApiController]
+[Route("api/expenses/")]
+public class ExpensesController : ControllerBase
 {
-  [ApiController]
-  [Route("api/expenses/")]
-  public class ExpensesController : ControllerBase
+  private readonly ExpenseService _expenseService;
+
+  public ExpensesController(ExpenseService expenseService)
   {
-    private readonly ExpenseService _expenseService;
+    _expenseService = expenseService;
+  }
 
-    public ExpensesController(ExpenseService expenseService)
+  [HttpGet]
+  [Route("list")]
+  public async Task<ActionResult<ExpenseDTO>> GetExpenses()
+  {
+    List<Expense> expenses = (await _expenseService.GetAllExpensesAsync()).ToList();
+
+    if (expenses == null)
     {
-      _expenseService = expenseService;
+      return Ok(Enumerable.Empty<ExpenseDTO>());
     }
 
-    [HttpGet]
-    [Route("list")]
-    public async Task<ActionResult<ExpenseDTO>> GetExpenses()
+    List<ExpenseDTO> result = new List<ExpenseDTO>();
+
+    for (int i = 0; i < expenses.Count; i++)
     {
-      List<Expense> expenses = (await _expenseService.GetAllExpensesAsync()).ToList();
+      Expense item = expenses[i];
 
-      if (expenses == null)
+      result.Add(new ExpenseDTO()
       {
-        return Ok(Enumerable.Empty<ExpenseDTO>());
-      }
-
-      List<ExpenseDTO> result = new List<ExpenseDTO>();
-
-      for (int i = 0; i < expenses.Count; i++)
-      {
-        Expense item = expenses[i];
-
-        result.Add(new ExpenseDTO()
-        {
-          Id = item.Id,
-          Amount = item.Amount,
-          Category = item.Category,
-          Date = item.Date,
-          Description = item.Description
-        });
-      }
-
-      return Ok(result);
+        Id = item.Id,
+        Amount = item.Amount,
+        Category = item.Category,
+        Date = item.Date,
+        Description = item.Description
+      });
     }
 
-    [HttpGet]
-    [Route(":id")]
-    public async Task<ActionResult<ExpenseDTO>> GetExpense(Guid id)
+    return Ok(result);
+  }
+
+  [HttpGet]
+  [Route(":id")]
+  public async Task<ActionResult<ExpenseDTO>> GetExpense(Guid id)
+  {
+    var expense = await _expenseService.GetExpenseByIdAsync(id);
+
+    if (expense == null)
     {
-      var expense = await _expenseService.GetExpenseByIdAsync(id);
-
-      if (expense == null)
-      {
-        return NotFound();
-      }
-
-      return new ExpenseDTO() { Id = expense.Id, Amount = expense.Amount, Category = expense.Category, Date = expense.Date, Description = expense.Description };
+      return NotFound();
     }
 
-    [HttpPost]
-    public async Task<ActionResult<Guid>> CreateExpense(ExpenseDTO expenseDto)
+    return new ExpenseDTO() { Id = expense.Id, Amount = expense.Amount, Category = expense.Category, Date = expense.Date, Description = expense.Description };
+  }
+
+  [HttpPost]
+  public async Task<ActionResult<Guid>> CreateExpense(ExpenseDTO expenseDto)
+  {
+    var expense = new Expense()
     {
-      var expense = new Expense()
-      {
-        Id = expenseDto.Id,
-        Amount = expenseDto.Amount,
-        Category = expenseDto.Category,
-        Date = expenseDto.Date,
-        Description = expenseDto.Description
-      };
+      Id = expenseDto.Id,
+      Amount = expenseDto.Amount,
+      Category = expenseDto.Category,
+      Date = expenseDto.Date,
+      Description = expenseDto.Description
+    };
 
-      await _expenseService.AddExpenseAsync(expense);
+    await _expenseService.AddExpenseAsync(expense);
 
-      return Created();
+    return Created();
+  }
+
+  [HttpPut]
+  public async Task<ActionResult<Expense>> UpdateExpense(Guid id, ExpenseDTO expenseDto)
+  {
+    if (id != expenseDto.Id)
+    {
+      return BadRequest();
     }
 
-    [HttpPut]
-    public async Task<ActionResult<Expense>> UpdateExpense(Guid id, ExpenseDTO expenseDto)
+    var expense = new Expense()
     {
-      if (id != expenseDto.Id)
-      {
-        return BadRequest();
-      }
+      Id = expenseDto.Id,
+      Amount = expenseDto.Amount,
+      Category = expenseDto.Category,
+      Date = expenseDto.Date,
+      Description = expenseDto.Description
+    };
 
-      var expense = new Expense()
-      {
-        Id = expenseDto.Id,
-        Amount = expenseDto.Amount,
-        Category = expenseDto.Category,
-        Date = expenseDto.Date,
-        Description = expenseDto.Description
-      };
+    await _expenseService.UpdateExpenseAsync(expense);
 
-      await _expenseService.UpdateExpenseAsync(expense);
-
-      return NoContent();
-    }
+    return NoContent();
   }
 }

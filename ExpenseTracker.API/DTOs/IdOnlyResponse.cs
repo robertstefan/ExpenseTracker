@@ -1,7 +1,6 @@
-﻿namespace ExpenseTracker.API.DTOs
+﻿namespace ExpenseTracker.API.DTOs;
+
+public class IdOnlyResponse
 {
-  public class IdOnlyResponse
-  {
-    public Object Id { get; set; }
-  }
+  public Object Id { get; set; }
 }

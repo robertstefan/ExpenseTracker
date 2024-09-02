@@ -1,8 +1,7 @@
-﻿namespace ExpenseTracker.Core.Models
+﻿namespace ExpenseTracker.Core.Models;
+
+public class Category
 {
-  public class Category
-  {
-    public int Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-  }
+  public int Id { get; set; }
+  public string Name { get; set; } = string.Empty;
 }

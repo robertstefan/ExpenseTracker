@@ -4,12 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ExpenseTracker.Core.Models
+namespace ExpenseTracker.Core.Models;
+
+public enum TransactionType
 {
-  public enum TransactionType
-  {
-    Payment = 0,
-    Withdrawal = 1,
-    Deposit = 2
-  }
+  Payment = 0,
+  Withdrawal = 1,
+  Deposit = 2
 }

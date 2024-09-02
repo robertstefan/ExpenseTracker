@@ -3,20 +3,20 @@ using Dapper;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
-namespace ExpenseTracker.Data.Repositories
-{
-  public class SubcategoryRepository : ISubcategoryRepository
-  {
-    private readonly string _connectionString;
-    private string TableName => "[Subcategories]";
+namespace ExpenseTracker.Data.Repositories;
 
-    public SubcategoryRepository(string connectionString)
-    {
+public class SubcategoryRepository : ISubcategoryRepository
+{
+  private readonly string _connectionString;
+  private string TableName => "[Subcategories]";
+
+  public SubcategoryRepository(string connectionString)
+  {
       _connectionString = connectionString;
     }
 
-    public async Task<int> AddSubcategoryAsync(Subcategory subcategory)
-    {
+  public async Task<int> AddSubcategoryAsync(Subcategory subcategory)
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"INSERT INTO {TableName} (Name, CategoryId)
                           VALUES (@Name, @CategoryId);
@@ -28,32 +28,32 @@ namespace ExpenseTracker.Data.Repositories
       return newId;
     }
 
-    public async Task<Subcategory> GetSubcategoryByIdAsync(int subcategoryId)
-    {
+  public async Task<Subcategory> GetSubcategoryByIdAsync(int subcategoryId)
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"SELECT * FROM {TableName} WHERE Id = @Id";
 
       return await connection.QuerySingleAsync<Subcategory>(query, new { Id = subcategoryId });
     }
 
-    public async Task<IEnumerable<Subcategory>> GetAllSubcategoriesAsync()
-    {
+  public async Task<IEnumerable<Subcategory>> GetAllSubcategoriesAsync()
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"SELECT * FROM {TableName}";
 
       return await connection.QueryAsync<Subcategory>(query);
     }
 
-    public async Task<IEnumerable<Subcategory>> GetSubcategoriesByCategoryIdAsync(int categoryId)
-    {
+  public async Task<IEnumerable<Subcategory>> GetSubcategoriesByCategoryIdAsync(int categoryId)
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"SELECT * FROM {TableName} WHERE CategoryId = @CategoryId";
 
       return await connection.QueryAsync<Subcategory>(query, new { CategoryId = categoryId });
     }
 
-    public async Task<Subcategory?> UpdateSubcategoryAsync(Subcategory subcategory)
-    {
+  public async Task<Subcategory?> UpdateSubcategoryAsync(Subcategory subcategory)
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"UPDATE {TableName}
                           SET Name = @Name, CategoryId = @CategoryId
@@ -69,13 +69,12 @@ namespace ExpenseTracker.Data.Repositories
       return subcategory; // Return the updated subcategory
     }
 
-    public async Task<bool> DeleteSubcategoryAsync(int subcategoryId)
-    {
+  public async Task<bool> DeleteSubcategoryAsync(int subcategoryId)
+  {
       using var connection = new SqlConnection(_connectionString);
       var query = $@"DELETE FROM {TableName} WHERE Id = @Id";
       var affectedRows = await connection.ExecuteAsync(query, new { Id = subcategoryId });
 
       return affectedRows == 1;
     }
-  }
 }

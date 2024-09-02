@@ -2,12 +2,12 @@
 using System.ComponentModel.DataAnnotations;
 
 
-namespace ExpenseTracker.Core.Validation
+namespace ExpenseTracker.Core.Validation;
+
+public class ValidTransactionType : ValidationAttribute
 {
-  public class ValidTransactionType : ValidationAttribute
+  protected override ValidationResult IsValid(object value, ValidationContext validationContext)
   {
-    protected override ValidationResult IsValid(object value, ValidationContext validationContext)
-    {
       int intValue = (int)value;
       if (Enum.IsDefined(typeof(TransactionType), intValue))
       {
@@ -15,5 +15,4 @@ namespace ExpenseTracker.Core.Validation
       }
       return new ValidationResult("Invalid transaction type.");
     }
-  }
 }
