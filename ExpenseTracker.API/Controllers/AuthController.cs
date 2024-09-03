@@ -3,7 +3,6 @@ using ExpenseTracker.Core.Common.Authentication;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -18,10 +17,7 @@ public class AuthController(AuthService _authService) : ControllerBase
     var authResponse = await _authService.LoginAsync(request.Email,
       request.Password);
 
-    if (authResponse == null)
-    {
-      return Unauthorized();
-    }
+    if (authResponse == null) return Unauthorized();
 
     return Ok(authResponse);
   }
@@ -32,20 +28,17 @@ public class AuthController(AuthService _authService) : ControllerBase
   {
     var validationErrors = request.Validate();
 
-    if (validationErrors.Count != 0)
-    {
-      return BadRequest(new { Errors = validationErrors });
-    }
+    if (validationErrors.Count != 0) return BadRequest(new { Errors = validationErrors });
 
     try
     {
-      var user = new User()
+      var user = new User
       {
         Username = request.Username,
         Email = request.Email,
         PasswordHash = request.Password,
         LastName = request.LastName,
-        FirstName = request.FirstName,
+        FirstName = request.FirstName
       };
 
       var authResponse = await _authService.Register(user);

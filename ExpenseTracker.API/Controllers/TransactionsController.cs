@@ -55,7 +55,7 @@ public class TransactionsController : ControllerBase
 
     if (transactionModel.Date <= DateTime.MinValue)
       return BadRequest($"Date cannot be lower than ${DateTime.MinValue.Date.ToShortDateString()}");
-    
+
     // Extract the UserId from the JWT claims
     var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 

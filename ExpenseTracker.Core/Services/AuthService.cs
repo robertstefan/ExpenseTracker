@@ -1,5 +1,5 @@
-using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Common.Authentication;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.Core.Services;
@@ -11,33 +11,25 @@ public class AuthService(UserService _userService, IJwtTokenGenerator _jwtTokenG
   {
     var user = await _userService.GetUserByEmail(email);
 
-    if (user is null)
-    {
-      return null;
-    }
+    if (user is null) return null;
 
-    if (user.LockedOut)
-    {
-      return null;
-    }
+    if (user.LockedOut) return null;
 
-    if (user.PasswordHash != password)
-    {
-      return null;
-    }
+    // @TODO: actually hash this
+    if (user.PasswordHash != password) return null;
 
     var token = _jwtTokenGenerator.GenerateToken(user);
-    return new AuthServiceResponse(){User = user,Token = token};
+    return new AuthServiceResponse { User = user, Token = token };
   }
-  
+
   public async Task<AuthServiceResponse?> Register(User user)
   {
     var userId = await _userService.CreateUserAsync(user);
+    // @TODO: hash the password
     user = await _userService.GetUserById(userId);
-    Console.WriteLine("HERE");
 
     var token = _jwtTokenGenerator.GenerateToken(user);
 
-    return new AuthServiceResponse(){User = user, Token = token};
+    return new AuthServiceResponse { User = user, Token = token };
   }
 }

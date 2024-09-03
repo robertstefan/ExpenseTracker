@@ -25,7 +25,7 @@ public class UserRepository : IUserRepository
         VALUES 
         (@Username, @Email, @PasswordHash, GETDATE(), @FirstName, @LastName);
         SELECT CAST(SCOPE_IDENTITY() as int);";
-    
+
     var id = await connection.ExecuteScalarAsync<int>(sql, user);
 
     return id;

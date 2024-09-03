@@ -6,4 +6,10 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+        <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
+            <HintPath>..\..\..\..\.nuget\packages\microsoft.extensions.dependencyinjection.abstractions\9.0.0-preview.7.24405.7\lib\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
 </Project>
