@@ -31,7 +31,6 @@ public class TransactionsController : ControllerBase
   {
     var transaction = await _transactionService.GetTransactionByIdAsync(id);
 
-    // @TODO: this doesn't work
     if (transaction == null) return NotFound();
 
     return Ok(transaction);

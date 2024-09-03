@@ -13,9 +13,6 @@ public static class DependencyInjection
 {
   public static IServiceCollection AddData(this IServiceCollection services, ConfigurationManager configuration)
   {
-    services.AddScoped<IExpenseRepository, ExpenseRepository>(sp =>
-      new ExpenseRepository(configuration.GetConnectionString("DefaultConnection")));
-
     services.AddScoped<ITransactionRepository, TransactionsRepository>(sp =>
       new TransactionsRepository(configuration.GetConnectionString("DefaultConnection")));
 

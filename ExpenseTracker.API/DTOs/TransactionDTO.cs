@@ -6,7 +6,6 @@ namespace ExpenseTracker.API.DTOs;
 // @TODO: move validations here??
 public class TransactionDTO
 {
-  // @TODO: nullable?
   public string? Description { get; set; }
 
   public DateTime Date { get; set; }
