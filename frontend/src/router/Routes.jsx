@@ -5,15 +5,24 @@ import Categories from '../pages/categories';
 import Layout from '../components/layout';
 import NewCategory from '../pages/categories/category/NewCategory';
 import EditCategory from '../pages/categories/category/EditCategory';
+import Transactions from '../pages/transactions';
+import EditTransaction from '../pages/transactions/transaction/EditTransaction';
 
 export default function AppRoutes() {
 	return (
 		<Routes>
 			<Route element={<Layout />}>
 				<Route index element={<Dashboard />} />
-				<Route path='/category' element={<Categories />} />
-				<Route path='/category/new' element={<NewCategory />} />
-				<Route path='/category/:id' element={<EditCategory />} />
+				<Route path='/categories'>
+					<Route index element={<Categories />} />
+					<Route path='new' element={<NewCategory />} />
+					<Route path=':id' element={<EditCategory />} />
+				</Route>
+				<Route path='/transactions'>
+					<Route index element={<Transactions />} />
+					{/* <Route path='new' element={<NewCategory />} /> */}
+					<Route path=':id' element={<EditTransaction />} />
+				</Route>
 			</Route>
 			<Route path='*' element={<NotFound />} />
 		</Routes>

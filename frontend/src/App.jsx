@@ -8,6 +8,7 @@ import store from './state/store';
 import theme from './assets/styles/theme';
 import Loading from './components/loading';
 import '@mantine/core/styles.layer.css';
+import '@mantine/dates/styles.css';
 import '@mantine/notifications/styles.layer.css';
 import './assets/css/main.scss';
 

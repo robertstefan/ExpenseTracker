@@ -1,0 +1,37 @@
+const currencies = [
+	'AED',
+	'AUD',
+	'BGN',
+	'BRL',
+	'CAD',
+	'CHF',
+	'CNY',
+	'CZK',
+	'DKK',
+	'EGP',
+	'EUR',
+	'GBP',
+	'HUF',
+	'INR',
+	'JPY',
+	'KRW',
+	'MDL',
+	'MXN',
+	'NOK',
+	'NZD',
+	'PLN',
+	'RSD',
+	'RUB',
+	'SEK',
+	'THB',
+	'TRY',
+	'UAH',
+	'USD',
+	'XAU',
+	'XDR',
+	'ZAR',
+];
+
+const transactionTypes = ['Income', 'Refund', 'Deposit', 'Expense', 'Transfer', 'Investment', 'Withdrawal'];
+
+export { currencies, transactionTypes };
