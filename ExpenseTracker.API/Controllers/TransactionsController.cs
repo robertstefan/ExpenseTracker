@@ -1,6 +1,8 @@
-﻿using ExpenseTracker.API.DTOs;
+﻿using System.Security.Claims;
+using ExpenseTracker.API.DTOs;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers;
@@ -42,6 +44,7 @@ public class TransactionsController : ControllerBase
     return (await _transactionService.GetTransactionsByTypeAsync(type)).ToList();
   }
 
+  [Authorize]
   [HttpPost]
   [Route("create")]
   public async Task<ActionResult<Transaction>> AddTransaction(TransactionDTO transactionModel)
@@ -52,7 +55,12 @@ public class TransactionsController : ControllerBase
 
     if (transactionModel.Date <= DateTime.MinValue)
       return BadRequest($"Date cannot be lower than ${DateTime.MinValue.Date.ToShortDateString()}");
+    
+    // Extract the UserId from the JWT claims
+    var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
+    if (string.IsNullOrEmpty(userId))
+      return Unauthorized("Invalid user");
     Guid result;
 
     try
@@ -65,6 +73,7 @@ public class TransactionsController : ControllerBase
         Date = transactionModel.Date,
         Description = transactionModel.Description,
         IsRecurrent = transactionModel.IsRecurrent,
+        UserId = int.Parse(userId),
         Type = transactionModel.Type
       });
     }

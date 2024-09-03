@@ -12,6 +12,7 @@ public class Transaction
   public decimal Amount { get; set; }
   public DateTime Date { get; set; }
   public bool IsRecurrent { get; set; }
+  public int UserId { get; set; }
 
   public TransactionType Type { get; set; }
 

@@ -20,8 +20,8 @@ public class TransactionsRepository : ITransactionRepository
   {
     using var connection = new SqlConnection(_connectionString);
     var query = $@"INSERT INTO {TableName} 
-                                (Id, Description, Amount, Date, CategoryId, SubcategoryId, IsRecurrent, TransactionType)
-                         VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @SubcategoryId, @IsRecurrent, @Type)";
+                                (Id, Description, Amount, Date, CategoryId, SubcategoryId, UserId, IsRecurrent, TransactionType)
+                         VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @SubcategoryId, @UserId, @IsRecurrent, @Type)";
 
     await connection.ExecuteAsync(query, transaction);
 
@@ -50,6 +50,7 @@ public class TransactionsRepository : ITransactionRepository
                     t.Date, 
                     t.IsRecurrent, 
                     t.TransactionType AS Type,
+                    t.UserId,
                     t.CategoryId,
                     t.SubcategoryId,
                     c.Id AS CategoryId,
@@ -83,6 +84,7 @@ public class TransactionsRepository : ITransactionRepository
                     t.Date, 
                     t.IsRecurrent, 
                     t.TransactionType AS Type,
+                    t.UserId,
                     t.CategoryId,
                     t.SubcategoryId,
                     c.Id AS CategoryId,
@@ -120,6 +122,7 @@ public class TransactionsRepository : ITransactionRepository
                     t.Date, 
                     t.IsRecurrent, 
                     t.TransactionType AS Type,
+                    t.UserId,
                     t.CategoryId,
                     t.SubcategoryId,
                     c.Id AS CategoryId,
@@ -153,6 +156,7 @@ public class TransactionsRepository : ITransactionRepository
                                 Description = @Description,
                                 Amount = @Amount,
                                 Date = @Date,
+                                UserId = @UserId,
                                 CategoryId = @CategoryId,
                                 SubcategoryId = @SubcategoryId,
                                 IsRecurrent = @IsRecurrent,
