@@ -1,6 +1,7 @@
 ﻿using ExpenseTracker.API.DTOs;
 using ExpenseTracker.API.Requests.Transactions;
 using ExpenseTracker.Core.Common.Enums;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 
@@ -10,7 +11,7 @@ namespace ExpenseTracker.API.Controllers;
 
 [Route("api/transactions")]
 [ApiController]
-public class TransactionsController(TransactionService _transactionService, ILogger<TransactionsController> _logger) : ControllerBase
+public class TransactionsController(TransactionService _transactionService, ILogger<TransactionsController> _logger, ICurrencyExchangeProvider _exchangeProvider) : ControllerBase
 {
   [HttpGet("list")]
   public async Task<ActionResult<List<Transaction>>> GetTransactionsPaginated([FromQuery] int offset = 0, [FromQuery] int limit = 10)
@@ -70,13 +71,19 @@ public class TransactionsController(TransactionService _transactionService, ILog
     Enum.TryParse(transactionModel.TransactionType, out transactionTypeEnum);
     try
     {
+      double exchangeRate = _exchangeProvider[transactionModel.currency] != 0 ?
+        _exchangeProvider[transactionModel.currency] : 1.0;
+
       Transaction transaction = Transaction.CreateNew(
         transactionModel.Description,
         transactionModel.Amount,
         transactionModel.Date,
         transactionModel.CategoryId,
         transactionModel.IsRecurrent,
-        transactionTypeEnum
+        transactionTypeEnum,
+        transactionModel.UserId,
+        transactionModel.currency,
+        exchangeRate
       );
       Guid result = await _transactionService.AddTransactionAsync(transaction);
 
@@ -109,7 +116,8 @@ public class TransactionsController(TransactionService _transactionService, ILog
         request.Date,
         request.CategoryId,
         request.IsRecurrent,
-        transactionTypeEnum
+        transactionTypeEnum,
+        request.UserId
       );
 
       var result = await _transactionService.UpdateTransactionAsync(transaction);

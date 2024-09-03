@@ -6,10 +6,12 @@ namespace ExpenseTracker.Core.Services
   public class TransactionService
   {
     private readonly ITransactionRepository _transactionRepository;
+    private readonly ICurrencyExchangeProvider _currencyExchangeProvider;
 
-    public TransactionService(ITransactionRepository transactionRepository)
+    public TransactionService(ITransactionRepository transactionRepository, ICurrencyExchangeProvider exchangeProvider)
     {
       _transactionRepository = transactionRepository;
+      _currencyExchangeProvider = exchangeProvider;
     }
 
     public async Task<Guid> AddTransactionAsync(Transaction transaction)

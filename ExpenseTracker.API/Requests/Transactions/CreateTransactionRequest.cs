@@ -4,7 +4,10 @@ public record CreateTransactionRequest(string Description,
                                        DateTime Date,
                                        Guid CategoryId,
                                        bool IsRecurrent,
-                                       string TransactionType);
+                                       string TransactionType,
+                                       int UserId,  
+                                       string currency,
+                                       double exchangeRate);
 
 //public class CreateTransactionRequest
 //{

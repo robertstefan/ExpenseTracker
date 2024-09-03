@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using ExpenseTracker.Core.Common.Enums;
+﻿using ExpenseTracker.Core.Common.Enums;
 
 namespace ExpenseTracker.Core.Models;
 
@@ -16,8 +15,11 @@ public class Transaction
   public DateTimeOffset UpdatedDateTime { get; private set; }
   public bool IsDeleted { get; private set; }
 
-  //[NotMapped]
-  //public string CategoryName { get; set; }
+  public int UserId { get; private set; }
+
+  public string Currency { get; private set; }
+
+  public double ExchangeRate { get; set; }
 
   public Category? Category { get; set; }
 
@@ -27,7 +29,7 @@ public class Transaction
   }
 
   private Transaction(Guid id, string description, decimal amount, DateTime date, Guid categoryId, bool isRecurrent,
-                      TransactionType transactionType)
+                      TransactionType transactionType, int userId, string currency = "RON", double exchangeRate = 1.0d)
   {
     Id = id;
     Description = description;
@@ -36,10 +38,15 @@ public class Transaction
     CategoryId = categoryId;
     IsRecurrent = isRecurrent;
     TransactionType = transactionType;
+    UserId = userId;
+
+    Currency = currency;
+    ExchangeRate = exchangeRate;
   }
 
   public static Transaction CreateNew(string description, decimal amount, DateTime date, Guid categoryId,
-                                      bool isRecurrent, TransactionType transactionType)
+                                      bool isRecurrent, TransactionType transactionType, int userId,
+                                      string currency = "RON", double exchangeRate = 1.0d)
   {
     return new(
       Guid.NewGuid(),
@@ -48,12 +55,15 @@ public class Transaction
       date,
       categoryId,
       isRecurrent,
-      transactionType
+      transactionType,
+      userId,
+      currency,
+      exchangeRate
     );
   }
 
   public static Transaction Create(Guid id, string description, decimal amount, DateTime date, Guid categoryId,
-                                   bool isRecurrent, TransactionType transactionType)
+                                   bool isRecurrent, TransactionType transactionType, int userId)
   {
     return new(
       id,
@@ -62,7 +72,8 @@ public class Transaction
       date,
       categoryId,
       isRecurrent,
-      transactionType
+      transactionType,
+      userId
     );
   }
 }

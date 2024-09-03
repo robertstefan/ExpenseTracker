@@ -1,3 +1,4 @@
+using ExpenseTracker.API.Services;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Services;
 using ExpenseTracker.Data.Repositories;
@@ -14,6 +15,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddSingleton<ICurrencyExchangeProvider, CurrencyExchangeProvider>();
+builder.Services.AddHostedService<ExchangeRatesService>();
+
 builder.Services.AddScoped<ITransactionRepository, ITransactionRepository>(sp =>
     new TransactionsRespository(builder.Configuration.GetConnectionString("DefaultConnection")!));
 builder.Services.AddScoped<TransactionService>();
@@ -22,8 +26,8 @@ builder.Services.AddScoped<ICategoriesRepository, CategoriesRepository>(sp =>
     new CategoriesRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
 builder.Services.AddScoped<CategoryService>();
 
-builder.Services.AddScoped<IRaportRepository, RaportRepository>(sp =>
-    new RaportRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
+builder.Services.AddScoped<IRaportRepository, ReportRepository>(sp =>
+    new ReportRepository(builder.Configuration.GetConnectionString("DefaultConnection")!));
 builder.Services.AddScoped<RaportService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>(sp =>

@@ -1,9 +1,9 @@
-﻿using System.Data.SqlClient;
-
-using Dapper;
+﻿using Dapper;
 
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
+
+using Microsoft.Data.SqlClient;
 
 namespace ExpenseTracker.Data.Repositories
 {
@@ -25,9 +25,9 @@ namespace ExpenseTracker.Data.Repositories
             )
             BEGIN
                 INSERT INTO {TableName}
-                (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType, CreatedDateTime, UpdatedDateTime)
+                (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType, CreatedDateTime, Currency, ExchangeRate)
                 VALUES 
-                (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @TransactionType, GETDATE(), GETDATE())
+                (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @TransactionType, GETDATE(), @Currency, @ExchangeRate)
             END";
 
         int affectedRows = await connection.ExecuteAsync(createTransactionQuery, transaction);
@@ -109,6 +109,8 @@ namespace ExpenseTracker.Data.Repositories
                       t.TransactionType,
                       t.CreatedDateTime,
                       t.UpdatedDateTime,
+                      t.Currency,
+                      t.ExchangeRate,
                       c.Name as CategoryName
                     FROM 
                       {TableName} t
@@ -141,7 +143,9 @@ namespace ExpenseTracker.Data.Repositories
                    CategoryId = @CategoryId,
                    IsRecurrent = @IsRecurrent,
                    TransactionType = @TransactionType,
-                   UpdatedDateTime = GETDATE()
+                   UpdatedDateTime = GETDATE(),
+                   Currency = @Currency,
+                   ExchangeRate = @ExchangeRate
                WHERE Id = @Id";
 
       var result = await conn.ExecuteAsync(query, transaction);

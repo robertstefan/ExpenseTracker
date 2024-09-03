@@ -5,4 +5,5 @@ public record UpdateTransactionRequest(Guid Id,
                                        DateTime Date,
                                        Guid CategoryId,
                                        bool IsRecurrent,
-                                       string TransactionType);
+                                       string TransactionType,
+                                       int UserId);
