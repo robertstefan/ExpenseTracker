@@ -1,22 +1,18 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Button, NumberInput, Select, Switch, TextInput, Title } from '@mantine/core';
 import { Controller, useForm } from 'react-hook-form';
-import { useParams } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
 import { DateInput } from '@mantine/dates';
 import { yupResolver } from '@hookform/resolvers/yup';
 import dayjs from 'dayjs';
 import { currencies, transactionTypes } from '../../../state/constants';
-import { useGetTransactionQuery, useUpdateTransactionMutation } from '../../../state/transaction/api';
+import { useCreateTransactionMutation } from '../../../state/transaction/api';
 import { useGetCategoriesQuery } from '../../../state/category/api';
 import { useGetUsersQuery } from '../../../state/user/api';
-import { defaultValues, schema } from './EditTransaction.logic';
+import { defaultValues, schema } from './NewTransaction.logic';
 
-const EditTransaction = () => {
-	const { id } = useParams();
-
-	const { data: transaction } = useGetTransactionQuery(id);
-	const [updateTransaction, resultUpdateTransaction] = useUpdateTransactionMutation();
+const NewTransaction = () => {
+	const [createTransaction, useCreateTransactionResult] = useCreateTransactionMutation();
 	const { data: categories = [] } = useGetCategoriesQuery();
 	const { data: users = [] } = useGetUsersQuery();
 
@@ -24,37 +20,21 @@ const EditTransaction = () => {
 		control,
 		register,
 		handleSubmit,
-		reset,
 		formState: { errors },
 	} = useForm({ defaultValues, resolver: yupResolver(schema) });
 
-	useEffect(() => {
-		if (transaction) {
-			reset({
-				amount: transaction.amount,
-				description: transaction.description,
-				currency: transaction.currency,
-				transactionType: transaction.transactionType,
-				categoryId: transaction.categoryId,
-				userId: transaction.userId,
-				date: dayjs(transaction.date, 'YYYY-MM-DDTHH:mm:ss').toDate(),
-				isRecurrent: transaction.isRecurrent,
-			});
-		}
-	}, [transaction]);
-
 	const onSubmit = async (data) => {
-		await updateTransaction({ ...data, id, date: dayjs(data.date).format('YYYY-MM-DD') });
+		await createTransaction({ ...data, date: dayjs(data.date).format('YYYY-MM-DD') });
 
 		notifications.show({
-			title: 'Transaction modified',
+			title: 'Transaction created',
 			position: 'bottom-right',
 		});
 	};
 
 	return (
 		<div>
-			<Title>Edit Transaction</Title>
+			<Title>New Transaction</Title>
 			<form onSubmit={handleSubmit(onSubmit)}>
 				<NumberInput {...register('amount')} label='Amount' withAsterisk error={errors.amount?.message} />
 				<TextInput
@@ -121,7 +101,7 @@ const EditTransaction = () => {
 					control={control}
 					render={({ field }) => <Switch {...field} label='Recurrent' error={errors.isRecurrent?.message} />}
 				/>
-				<Button type='submit' mt='md' disabled={resultUpdateTransaction?.isLoading}>
+				<Button type='submit' mt='md' disabled={useCreateTransactionResult?.isLoading}>
 					Submit
 				</Button>
 			</form>
@@ -129,4 +109,4 @@ const EditTransaction = () => {
 	);
 };
 
-export default EditTransaction;
+export default NewTransaction;

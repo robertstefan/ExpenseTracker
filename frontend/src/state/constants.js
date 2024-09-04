@@ -1,4 +1,5 @@
 const currencies = [
+	'RON',
 	'AED',
 	'AUD',
 	'BGN',

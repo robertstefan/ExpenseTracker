@@ -1,12 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
-import { ActionIcon, Button, Group, Table, Title } from '@mantine/core';
+import { ActionIcon, Button, Group, Pagination, Table, Title } from '@mantine/core';
 import { IconCheck, IconEdit, IconTrash, IconX } from '@tabler/icons-react';
 import { useDeleteTransactionMutation, useGetTransactionsQuery } from '../../state/transaction/api';
 
+const LIMIT = 10;
+
 const Transactions = () => {
-	const { data: transactions = [], isLoading: isLoadingTransactions } = useGetTransactionsQuery();
+	const [activePage, setPage] = useState(1);
+
+	const { data: transactions = [], isLoading: isLoadingTransactions } = useGetTransactionsQuery({
+		offset: (activePage - 1) * LIMIT,
+		limit: LIMIT,
+	});
+
 	const [deleteTransaction] = useDeleteTransactionMutation();
 
 	const handleDeleteTransaction = (categoryId) => async () => {
@@ -23,7 +31,7 @@ const Transactions = () => {
 		<div>
 			<Group justify='space-between'>
 				<Title>Transactions</Title>
-				<Link to='/category/new'>
+				<Link to='/transactions/new'>
 					<Button>Add</Button>
 				</Link>
 			</Group>
@@ -61,6 +69,9 @@ const Transactions = () => {
 					))}
 				</Table.Tbody>
 			</Table>
+			<Group justify='center' mt='lg'>
+				<Pagination value={activePage} onChange={setPage} total={2} />
+			</Group>
 		</div>
 	);
 };
