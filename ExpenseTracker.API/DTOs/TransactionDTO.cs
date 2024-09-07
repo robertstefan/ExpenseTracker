@@ -14,6 +14,10 @@ public class TransactionDTO
 
   public bool IsRecurrent { get; set; }
 
+  public string Currency { get; set; } = "RON";
+  public double ExchangeRate { get; set; } = 1.0d;
+
+
 
   // using attribute to validate, so I don't have to do it everywhere I create a model/take user input
   [ValidTransactionType]

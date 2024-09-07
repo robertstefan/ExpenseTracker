@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=<q1w2!e345>
+    ports:
+      - "1433:1433"
+    volumes:
+      - ./mssql_data:/var/opt/mssql  # Mount current folder's mssql_data to the container
+    restart: unless-stopped  # Restart policy to keep the container running

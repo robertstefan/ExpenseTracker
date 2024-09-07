@@ -13,6 +13,10 @@ public class Transaction
   public DateTime Date { get; set; }
   public bool IsRecurrent { get; set; }
   public int UserId { get; set; }
+  
+  public string Currency { get;  set; }
+
+  public double ExchangeRate { get; set; }
 
   public TransactionType Type { get; set; }
 

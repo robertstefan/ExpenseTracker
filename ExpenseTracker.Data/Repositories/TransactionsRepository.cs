@@ -20,8 +20,8 @@ public class TransactionsRepository : ITransactionRepository
   {
     using var connection = new SqlConnection(_connectionString);
     var query = $@"INSERT INTO {TableName} 
-                                (Id, Description, Amount, Date, CategoryId, SubcategoryId, UserId, IsRecurrent, TransactionType)
-                         VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @SubcategoryId, @UserId, @IsRecurrent, @Type)";
+                                (Id, Description, Amount, Date, CategoryId, SubcategoryId, UserId, IsRecurrent, TransactionType, Currency, ExchangeRate)
+                         VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @SubcategoryId, @UserId, @IsRecurrent, @Type, @Currency, @ExchangeRate)";
 
     await connection.ExecuteAsync(query, transaction);
 
@@ -51,6 +51,8 @@ public class TransactionsRepository : ITransactionRepository
                     t.IsRecurrent, 
                     t.TransactionType AS Type,
                     t.UserId,
+                    t.Currency,
+                    t.ExchangeRate,
                     t.CategoryId,
                     t.SubcategoryId,
                     c.Id AS CategoryId,
@@ -85,6 +87,8 @@ public class TransactionsRepository : ITransactionRepository
                     t.IsRecurrent, 
                     t.TransactionType AS Type,
                     t.UserId,
+                    t.Currency,
+                    t.ExchangeRate,
                     t.CategoryId,
                     t.SubcategoryId,
                     c.Id AS CategoryId,
@@ -123,6 +127,8 @@ public class TransactionsRepository : ITransactionRepository
                     t.IsRecurrent, 
                     t.TransactionType AS Type,
                     t.UserId,
+                    t.Currency,
+                    t.ExchangeRate,
                     t.CategoryId,
                     t.SubcategoryId,
                     c.Id AS CategoryId,
@@ -158,6 +164,8 @@ public class TransactionsRepository : ITransactionRepository
                                 Date = @Date,
                                 UserId = @UserId,
                                 CategoryId = @CategoryId,
+                                Currency = @Currency,
+                                ExchangeRate = @ExchangeRate,
                                 SubcategoryId = @SubcategoryId,
                                 IsRecurrent = @IsRecurrent,
                                 TransactionType = @Type

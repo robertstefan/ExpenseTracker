@@ -1,4 +1,6 @@
 using ExpenseTracker.Core.Configuration;
+using ExpenseTracker.API.Services;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Data.Configuration;
 using Microsoft.OpenApi.Models;
 
@@ -36,6 +38,9 @@ builder.Services.AddSwaggerGen(c =>
     }
   });
 });
+
+builder.Services.AddSingleton<ICurrencyExchangeProvider, CurrencyExchangeProvider>();
+builder.Services.AddHostedService<ExchangeRatesService>();
 
 builder.Services
   .AddData(builder.Configuration)

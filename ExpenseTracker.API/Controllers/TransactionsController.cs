@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using ExpenseTracker.API.DTOs;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -12,10 +13,12 @@ namespace ExpenseTracker.API.Controllers;
 public class TransactionsController : ControllerBase
 {
   private readonly TransactionService _transactionService;
+  private readonly ICurrencyExchangeProvider _exchangeRateProvider;
 
-  public TransactionsController(TransactionService transactionService)
+  public TransactionsController(TransactionService transactionService, ICurrencyExchangeProvider _exchangeRateProvider)
   {
     _transactionService = transactionService;
+    this._exchangeRateProvider = _exchangeRateProvider;
   }
 
   [HttpGet]
@@ -48,6 +51,7 @@ public class TransactionsController : ControllerBase
   [Route("create")]
   public async Task<ActionResult<Transaction>> AddTransaction(TransactionDTO transactionModel)
   {
+    // @TODO: error on categoryId/subcategoryId being invalid
     if (transactionModel == null) return BadRequest();
 
     if (transactionModel.Amount <= 0) return BadRequest("Amount cannot be less or equal to 0");
@@ -64,6 +68,9 @@ public class TransactionsController : ControllerBase
 
     try
     {
+      Console.WriteLine(_exchangeRateProvider);
+      double exchangeRate = _exchangeRateProvider[transactionModel.Currency] != 0 ?
+        _exchangeRateProvider[transactionModel.Currency] : 1.0;
       result = await _transactionService.AddTransactionAsync(new Transaction
       {
         Amount = transactionModel.Amount,
@@ -73,7 +80,9 @@ public class TransactionsController : ControllerBase
         Description = transactionModel.Description,
         IsRecurrent = transactionModel.IsRecurrent,
         UserId = int.Parse(userId),
-        Type = transactionModel.Type
+        Type = transactionModel.Type,
+        Currency = transactionModel.Currency,
+        ExchangeRate = exchangeRate
       });
     }
     catch (Exception ex)
