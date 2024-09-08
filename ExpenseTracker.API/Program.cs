@@ -39,7 +39,7 @@ builder.Services.AddSwaggerGen(c =>
   });
 });
 
-builder.Services.AddSingleton<ICurrencyExchangeProvider, CurrencyExchangeProvider>();
+builder.Services.AddScoped<ICurrencyExchangeProvider, CurrencyExchangeProvider>();
 builder.Services.AddHostedService<ExchangeRatesService>();
 
 builder.Services

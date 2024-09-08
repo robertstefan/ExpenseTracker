@@ -1,15 +1,16 @@
 using ExpenseTracker.Core.Interfaces;
 using System.Xml.Serialization;
 using ExpenseTracker.API.Services;
+using ExpenseTracker.Core.Services;
 
 public class ExchangeRatesService : BackgroundService
 {
-  private readonly ICurrencyExchangeProvider _exchangeProvider;
+  private readonly IServiceProvider _serviceProvider;
   private readonly TimeSpan _scheduledTime;
 
-  public ExchangeRatesService(ICurrencyExchangeProvider exchangeProvider, ILogger<ExchangeRatesService> logger)
+  public ExchangeRatesService(IServiceProvider serviceProvider)
   {
-    _exchangeProvider = exchangeProvider;
+    _serviceProvider = serviceProvider;
     _scheduledTime = TimeSpan.Parse("13:00"); // Set the time you want the service to run
   }
 
@@ -56,21 +57,30 @@ public class ExchangeRatesService : BackgroundService
         }
 
         DataSetBodyCubeRate[]? rates = exchangeRates?.Body?.Cube?.Rate;
-        // @TODO: get from appsettings.json
-        _exchangeProvider.ExchangeRates["RON"] = 1.0d;
-        if (rates != null)
+        using (var scope = _serviceProvider.CreateScope())
         {
-          foreach (var rate in rates)
+          var exchangeRateCache = scope.ServiceProvider.GetRequiredService<IExchangeRatesCache>();
+          if (rates != null)
           {
-            _exchangeProvider.ExchangeRates[rate.currency] =
-              (double)(rate.multiplierSpecified ? rate.Value * rate.multiplier : rate.Value);
+            var exchangeRatesDictionary = new Dictionary<string, double>
+            {
+              ["RON"] = 1.0d
+            };
+
+            foreach (var rate in rates)
+            {
+              exchangeRatesDictionary[rate.currency] =
+                (double)(rate.multiplierSpecified ? rate.Value * rate.multiplier : rate.Value);
+            }
+
+            await exchangeRateCache.SetExchangeRatesAsync(exchangeRatesDictionary);
+
+            Console.WriteLine("Exchange rates updated successfully.");
           }
-          
-          Console.WriteLine("Exchange rates updated successfully.");
-        }
-        else
-        {
-          Console.WriteLine("No rates found in the response.");
+          else
+          {
+            Console.WriteLine("No rates found in the response.");
+          }
         }
       }
     }

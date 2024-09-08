@@ -1,6 +1,8 @@
 using System.Text;
 using ExpenseTracker.Core.Interfaces;
+using ExpenseTracker.Core.Services;
 using ExpenseTracker.Data.Authentication;
+using ExpenseTracker.Data.Cache;
 using ExpenseTracker.Data.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
@@ -24,7 +26,14 @@ public static class DependencyInjection
 
     services.AddScoped<IUserRepository, UserRepository>(sp =>
       new UserRepository(configuration.GetConnectionString("DefaultConnection")!));
+    services.AddStackExchangeRedisCache(options =>
+    {
+      options.Configuration = "localhost:6379";  // Redis connection string
+      options.InstanceName = "RedisExchangeRates_";  // Optional: a prefix for keys
+    });
 
+
+    services.AddScoped<IExchangeRatesCache, ExchangeRatesCache>();
     return services;
   }
 
