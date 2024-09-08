@@ -9,25 +9,43 @@ namespace ExpenseTracker.Data.Repositories
     {
         private readonly string _connectionString;
 
-        public UsersRepository(string connectionString)
+        public UsersRepository (string connectionString)
         {
             _connectionString = connectionString;
         }
 
-        public async Task<int> CreateUserAsync(User user)
+        public async Task<IEnumerable<User>> GetUsers ()
         {
             using var connection = new SqlConnection(_connectionString);
 
-            var query = @"INSERT INTO Users (Username, Email, PasswordHash, CreateDate, FirstName, LastName)
-                        VALUES (@Username, @Email, @PasswordHash, GETDATE(), @FirstName, @LastName);
-                        SELECT @@IDENTITY AS Id";
+            string query = @"SELECT u.*, t.*
+                             FROM Users u
+                             LEFT JOIN Transactions t ON u.Id = t.UserId";
 
-            var id = await connection.ExecuteScalarAsync<int>(query, user);
+            var usersList = new List<User>();
+            User currentUser = null;
 
-            return id;
+            await connection.QueryAsync<User, Transaction, User>(query, (user, transaction) =>
+            {
+                if (currentUser == null)
+                {
+                    currentUser = user;
+                    currentUser.Transactions = new List<Transaction>();
+
+                    usersList.Add(currentUser);
+                }
+
+                if (transaction != null)
+                {
+                    currentUser.Transactions.Add(transaction);
+                }
+
+                return currentUser;
+            }, splitOn: "Id");
+            return usersList;
         }
 
-        public async Task<bool> DeleteUserAsync(int userId)
+        public async Task<bool> DeleteUserAsync (int userId)
         {
             using var connection = new SqlConnection(_connectionString);
 
@@ -37,7 +55,7 @@ namespace ExpenseTracker.Data.Repositories
             return affected > 0;
         }
 
-        public async Task<User> GetUserByEmailAsync(string email)
+        public async Task<User> GetUserByEmailAsync (string email)
         {
             using var connection = new SqlConnection(_connectionString);
 
@@ -66,7 +84,7 @@ namespace ExpenseTracker.Data.Repositories
             return userResult;
         }
 
-        public async Task<User> GetUserByIdAsync(int userId)
+        public async Task<User> GetUserByIdAsync (int userId)
         {
             using var connection = new SqlConnection(_connectionString);
 
@@ -95,7 +113,7 @@ namespace ExpenseTracker.Data.Repositories
             return userResult;
         }
 
-        public async Task<User> GetUserByUsernameAsync(string username)
+        public async Task<User> GetUserByUsernameAsync (string username)
         {
             using var connection = new SqlConnection(_connectionString);
 
@@ -124,7 +142,7 @@ namespace ExpenseTracker.Data.Repositories
             return userResult;
         }
 
-        public async Task<User> UpdateUserAsync(User user)
+        public async Task<User> UpdateUserAsync (User user)
         {
             using var connection = new SqlConnection(_connectionString);
 
@@ -141,6 +159,19 @@ namespace ExpenseTracker.Data.Repositories
             await connection.ExecuteAsync(query, user);
 
             return user;
+        }
+
+        public async Task<int> CreateUserAsync (User user)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var query = @"INSERT INTO Users (Username, Email, UserPassword, CreateDate, FirstName, LastName)
+                        VALUES (@Username, @Email, @UserPassword, GETDATE(), @FirstName, @LastName);
+                        SELECT @@IDENTITY AS Id";
+
+            var id = await connection.ExecuteScalarAsync<int>(query, user);
+
+            return id;
         }
     }
 }

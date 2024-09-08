@@ -7,7 +7,7 @@ namespace ExpenseTracker.API.DTOs.Users
     {
         public string Username { get; set; }
         public string Email { get; set; }
-        public string PasswordHash { get; set; }
+        public string UserPassword { get; set; }
         public DateTimeOffset CreateDate { get; set; }
         public DateTimeOffset? UpdateDate { get; set; }
         public string LastName { get; set; }
@@ -16,16 +16,16 @@ namespace ExpenseTracker.API.DTOs.Users
         public short LoginTries { get; set; }
         public List<TransactionDTO> Transactions { get; set; } = new List<TransactionDTO>();
 
-        public UserDTO()
+        public UserDTO ()
         {
 
         }
 
-        public UserDTO(User user)
+        public UserDTO (User user)
         {
             Username = user.Username;
             Email = user.Email;
-            PasswordHash = user.PasswordHash;
+            UserPassword = user.UserPassword;
             CreateDate = user.CreateDate;
             UpdateDate = user.UpdateDate;
             LastName = user.LastName;

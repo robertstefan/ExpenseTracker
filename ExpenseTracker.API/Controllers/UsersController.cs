@@ -4,6 +4,9 @@ using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace ExpenseTracker.API.Controllers
@@ -21,6 +24,11 @@ namespace ExpenseTracker.API.Controllers
             _transactionsService = transactionsService;
         }
 
+        [HttpGet]
+        public async Task<ActionResult<List<UserDTO>>> GetUsers()
+        {
+            return Ok( await _usersService.GetUsers());
+        }
         [HttpGet("{userId}")]
         public async Task<ActionResult<UserDTO>> GetUserById(int userId)
         {
@@ -94,42 +102,6 @@ namespace ExpenseTracker.API.Controllers
                 return BadRequest("Error while retrieving transactions");
             }
         }
-        [HttpPost]
-        public async Task<ActionResult<int>> CreateUser(CreateAndUpdateUserDTO createUserDTO)
-        {
-
-            if (createUserDTO == null)
-            {
-                return BadRequest("Payload can't be null");
-            }
-
-            var validationResponse = ValidateUserCredentials(createUserDTO);
-            if (validationResponse != null)
-            {
-                return validationResponse;
-            }
-
-            try
-            {
-                User userToCreate = new User
-                {
-                    Email = createUserDTO.Email,
-                    FirstName = createUserDTO.FirstName,
-                    LastName = createUserDTO.LastName,
-                    PasswordHash = createUserDTO.PasswordHash,
-                    Username = createUserDTO.Username,
-                };
-
-                int createdUserId = await _usersService.CreateUserAsync(userToCreate);
-                return Created($"https://localhost:7032/api/users/{createdUserId}", userToCreate);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                return BadRequest("Error while creating the user");
-            }
-
-        }
         [HttpDelete("{userId}")]
         public async Task<ActionResult> DeleteUser(int userId)
         {
@@ -138,7 +110,7 @@ namespace ExpenseTracker.API.Controllers
             return isSuccesfullyDeleted ? NoContent() : BadRequest();
         }
         [HttpPut("{userId}")]
-        public async Task<ActionResult> UpdateUser(int userId, CreateAndUpdateUserDTO updateUserDTO)
+        public async Task<ActionResult> UpdateUser(int userId, UpdateUserDTO updateUserDTO)
         {
             var userToUpdate = await _usersService.GetUserByIdAsync(userId);
 
@@ -158,7 +130,6 @@ namespace ExpenseTracker.API.Controllers
             {
                 userToUpdate.Username = updateUserDTO.Username;
                 userToUpdate.Email = updateUserDTO.Email;
-                userToUpdate.PasswordHash = updateUserDTO.PasswordHash;
                 userToUpdate.FirstName = updateUserDTO.FirstName;
                 userToUpdate.LastName = updateUserDTO.LastName;
                 await _usersService.UpdateUserAsync(userToUpdate);
@@ -172,7 +143,7 @@ namespace ExpenseTracker.API.Controllers
 
 
         }
-        private ActionResult ValidateUserCredentials(CreateAndUpdateUserDTO userDTO)
+        private ActionResult ValidateUserCredentials(UpdateUserDTO userDTO)
         {
             string emailRegex = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
             Regex regex = new Regex(emailRegex);
@@ -205,11 +176,6 @@ namespace ExpenseTracker.API.Controllers
             if (string.IsNullOrEmpty(userDTO.LastName))
             {
                 return BadRequest("Invalid Last Name");
-            }
-
-            if (string.IsNullOrEmpty(userDTO.PasswordHash))
-            {
-                return BadRequest("Invalid Password");
             }
 
             return null;

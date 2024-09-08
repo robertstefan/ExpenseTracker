@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Group, Code, Text } from '@mantine/core';
-import { IconLogout, IconDashboard, IconCategory } from '@tabler/icons-react';
+import { IconLogout, IconDashboard, IconCategory, IconUsers, IconTransactionBitcoin } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 
 const data = [
 	{ link: '/', label: 'Dashboard', icon: IconDashboard },
 	{ link: '/categories', label: 'Categories', icon: IconCategory },
+	{ link: '/users', label: 'Users', icon: IconUsers },
+	{ link: '/transactions', label: 'Transactions', icon: IconTransactionBitcoin },
 ];
 
 export default function Navbar() {

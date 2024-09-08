@@ -1,7 +1,10 @@
-﻿namespace ExpenseTracker.API.DTOs.Categories
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace ExpenseTracker.API.DTOs.Categories
 {
     public class CreateCategoryDTO
     {
-        public string CategoryName { get; set; } = string.Empty;
+        [Required]
+        public string CategoryName { get; set; }
     }
 }

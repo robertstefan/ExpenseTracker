@@ -3,14 +3,14 @@ import { useDeleteCategoryMutation, useGetCategoriesQuery } from '../../state/ca
 import { IconEdit, IconTrash } from '@tabler/icons-react';
 import { Link } from 'react-router-dom';
 import { notifications } from '@mantine/notifications';
-const Categories = () => {
+const Transactions = () => {
 	const { data: categories = [], isLoading: isLoadingCategories } = useGetCategoriesQuery();
 	const [deleteCategory] = useDeleteCategoryMutation();
-	console.log(categories);
+
 	return (
 		<div>
 			<Group justify='space-between'>
-				<Title>Categories</Title>
+				<Title>Transactions</Title>
 				<Link to='/category/new'>
 					<Button>Add</Button>
 				</Link>
@@ -69,4 +69,4 @@ const Categories = () => {
 	);
 };
 
-export default Categories;
+export default Transactions;

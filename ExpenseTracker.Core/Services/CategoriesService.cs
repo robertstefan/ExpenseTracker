@@ -31,5 +31,10 @@ namespace ExpenseTracker.Core.Services
         {
             return await _categoriesRepository.DeleteCategoryAsync(categoryId);
         }
+
+        public async Task<Category> UpdateCategoryAsync(Category category)
+        {
+            return await _categoriesRepository.UpdateCategoryAsync(category);
+        }
     }
 }

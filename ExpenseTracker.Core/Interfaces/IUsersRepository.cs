@@ -4,10 +4,11 @@ namespace ExpenseTracker.Core.Interfaces
 {
     public interface IUsersRepository
     {
+        Task<IEnumerable<User>> GetUsers();
         Task<User> GetUserByIdAsync(int userId);
         Task<User> GetUserByEmailAsync(string email);
         Task<User> GetUserByUsernameAsync(string username);
-        Task<int> CreateUserAsync(User user);
+        Task<int> CreateUserAsync (User user);
         Task<User> UpdateUserAsync(User user);
         Task<bool> DeleteUserAsync(int userId);
     }

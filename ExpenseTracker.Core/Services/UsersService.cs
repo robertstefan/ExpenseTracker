@@ -12,9 +12,14 @@ namespace ExpenseTracker.Core.Services
             _usersRepository = usersRepository;
         }
 
+        public async Task<IEnumerable<User>> GetUsers()
+        {
+            return await _usersRepository.GetUsers();
+        }
+
         public async Task<User> GetUserByIdAsync(int userId)
         {
-            return (await _usersRepository.GetUserByIdAsync(userId));
+            return await _usersRepository.GetUserByIdAsync(userId);
         }
         public async Task<User> GetUserByEmailAsync(string email)
         {
@@ -23,23 +28,6 @@ namespace ExpenseTracker.Core.Services
         public async Task<User> GetUserByUsernameAsync(string username)
         {
             return await _usersRepository.GetUserByUsernameAsync(username);
-        }
-        public async Task<int> CreateUserAsync(User user)
-        {
-            User userByEmail = await _usersRepository.GetUserByEmailAsync(user.Email);
-            User userByUsername = await _usersRepository.GetUserByUsernameAsync(user.Username);
-
-            if (userByEmail != null)
-            {
-                throw new Exception("An user with that email already exists");
-            }
-
-            if (userByUsername != null)
-            {
-                throw new Exception("An user with that username already exists");
-            }
-
-            return await _usersRepository.CreateUserAsync(user);
         }
         public async Task<User> UpdateUserAsync(User user)
         {

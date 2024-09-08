@@ -1,5 +1,4 @@
 import { Button, TextInput, Title } from '@mantine/core';
-import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useCreateCategoryMutation } from '../../../state/category/api';
 import { notifications } from '@mantine/notifications';
@@ -18,7 +17,7 @@ const NewCategory = () => {
 		await createCategory(data);
 		notifications.show({
 			title: 'Category Added',
-			message: `Category ${data.name} was added`,
+			message: `Category ${data.categoryName} was added`,
 			position: 'bottom-right',
 		});
 		console.log(data);

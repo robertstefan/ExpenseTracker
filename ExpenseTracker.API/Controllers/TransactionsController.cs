@@ -1,13 +1,14 @@
 ﻿using ExpenseTracker.API.DTOs.Transactions;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
-
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExpenseTracker.API.Controllers
 {
     [Route("api/transactions")]
     [ApiController]
+    [Authorize]
     public class TransactionsController : ControllerBase
     {
         private readonly TransactionsService _transactionsService;
@@ -16,6 +17,12 @@ namespace ExpenseTracker.API.Controllers
         {
             _transactionsService = transactionsService;
         }
+
+        //[HttpGet("/get-current-user")]
+        //public async Task<ActionResult<>> GetCurrentUser()
+        //{
+
+        //}
 
         [HttpGet]
         public async Task<ActionResult<List<TransactionSummaryDTO>>> GetAllTransactions()
@@ -43,7 +50,7 @@ namespace ExpenseTracker.API.Controllers
         {
             var transaction = await _transactionsService.GetTransactionByIdAsync(transactionId);
 
-            if(transaction == null)
+            if (transaction == null)
             {
                 return BadRequest("Resource not found");
             }

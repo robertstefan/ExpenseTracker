@@ -203,6 +203,28 @@ namespace ExpenseTracker.API.Controllers
             }
         }
 
+        [HttpPut("{categoryId}")]
+        public async Task<ActionResult> UpdateCategory(Guid categoryId, UpdateCategoryDTO updateCategoryDTO)
+        {
+            Category categoryToUpdate = await _categoriesService.GetCategoryByIdAsync(categoryId);
+
+            if(categoryToUpdate == null)
+            {
+                return BadRequest("Resource not found");
+            }
+
+            try
+            {
+                categoryToUpdate.CategoryName = updateCategoryDTO.CategoryName;
+                await _categoriesService.UpdateCategoryAsync(categoryToUpdate);
+                return NoContent();
+            } catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest("Error while updating the category");
+            }
+        }
+
         [HttpDelete("{categoryId}")]
         public async Task<ActionResult> DeleteCategory(Guid categoryId)
         {

@@ -107,5 +107,23 @@ namespace ExpenseTracker.Data.Repositories
             return affectedRows != 0;
         }
 
+        public async Task<Category> UpdateCategoryAsync(Category category)
+        {   
+            using var conn = new SqlConnection(_connectionString);
+
+            var query = $@"UPDATE [Categories]
+                              SET 
+                                  CategoryName = @CategoryName
+                                  WHERE Id = @Id";
+
+            var result = await conn.ExecuteAsync(query, category);
+
+            if (result == 0)
+            {
+                return null;
+            }
+
+            return category;
+        }
     }
 }
