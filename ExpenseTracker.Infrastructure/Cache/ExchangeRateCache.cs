@@ -2,7 +2,7 @@ using System.Text.Json;
 using ExpenseTracker.Core.Services;
 using Microsoft.Extensions.Caching.Distributed;
 
-namespace ExpenseTracker.Data.Cache;
+namespace ExpenseTracker.Infrastructure.Cache;
 
 public class ExchangeRatesCache : IExchangeRatesCache
 {

@@ -1,15 +1,15 @@
 using System.Text;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Services;
-using ExpenseTracker.Data.Authentication;
-using ExpenseTracker.Data.Cache;
-using ExpenseTracker.Data.Repositories;
+using ExpenseTracker.Infrastructure.Authentication;
+using ExpenseTracker.Infrastructure.Cache;
+using ExpenseTracker.Infrastructure.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ExpenseTracker.Data.Configuration;
+namespace ExpenseTracker.Infrastructure.Configuration;
 
 public static class DependencyInjection
 {

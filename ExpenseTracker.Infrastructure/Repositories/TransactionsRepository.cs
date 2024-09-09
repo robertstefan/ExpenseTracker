@@ -3,7 +3,7 @@ using Dapper;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 
-namespace ExpenseTracker.Data.Repositories;
+namespace ExpenseTracker.Infrastructure.Repositories;
 
 public class TransactionsRepository : ITransactionRepository
 {

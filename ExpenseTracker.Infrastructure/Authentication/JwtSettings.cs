@@ -1,4 +1,4 @@
-namespace ExpenseTracker.Data.Authentication;
+namespace ExpenseTracker.Infrastructure.Authentication;
 
 public class JwtSettings
 {

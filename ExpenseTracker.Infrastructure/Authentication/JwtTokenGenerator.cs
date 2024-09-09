@@ -5,7 +5,7 @@ using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 using Microsoft.IdentityModel.Tokens;
 
-namespace ExpenseTracker.Data.Authentication;
+namespace ExpenseTracker.Infrastructure.Authentication;
 
 public class JwtTokenGenerator(JwtSettings _jwtSettings) : IJwtTokenGenerator
 {

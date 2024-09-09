@@ -1,7 +1,7 @@
 using ExpenseTracker.API.Services;
 using ExpenseTracker.Core.Configuration;
 using ExpenseTracker.Core.Interfaces;
-using ExpenseTracker.Data.Configuration;
+using ExpenseTracker.Infrastructure.Configuration;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
