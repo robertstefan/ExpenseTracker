@@ -7,27 +7,21 @@ namespace ExpenseTracker.API.Controllers;
 
 [Route("api/subcategories")]
 [ApiController]
-public class SubcategoriesController : ControllerBase
+public class SubcategoriesController(SubcategoryService subcategoryService, ILogger<SubcategoriesController> logger)
+  : ControllerBase
 {
-  private readonly SubcategoryService _subcategoryService;
-
-  public SubcategoriesController(SubcategoryService subcategoryService)
-  {
-    _subcategoryService = subcategoryService;
-  }
-
   [HttpGet]
   [Route("list-all")]
   public async Task<ActionResult<List<Subcategory>>> GetAllSubcategories()
   {
-    return (await _subcategoryService.GetAllSubcategoriesAsync()).ToList();
+    return (await subcategoryService.GetAllSubcategoriesAsync()).ToList();
   }
 
   [HttpGet]
   [Route("{id}")]
   public async Task<ActionResult<Subcategory>> GetSubcategory(int id)
   {
-    var subcategory = await _subcategoryService.GetSubcategoryByIdAsync(id);
+    var subcategory = await subcategoryService.GetSubcategoryByIdAsync(id);
 
     if (subcategory == null) return NotFound();
 
@@ -38,7 +32,7 @@ public class SubcategoriesController : ControllerBase
   [Route("by-category/{categoryId}")]
   public async Task<ActionResult<List<Subcategory>>> GetSubcategoriesByCategoryId(int categoryId)
   {
-    var subcategories = await _subcategoryService.GetSubcategoriesByCategoryIdAsync(categoryId);
+    var subcategories = await subcategoryService.GetSubcategoriesByCategoryIdAsync(categoryId);
 
     if (!subcategories.Any()) return NotFound();
 
@@ -56,12 +50,11 @@ public class SubcategoriesController : ControllerBase
 
     try
     {
-      subcategoryId = await _subcategoryService.AddSubcategoryAsync(subcategory);
+      subcategoryId = await subcategoryService.AddSubcategoryAsync(subcategory);
     }
     catch (Exception ex)
     {
-      // @TODO - LOG THE ERROR
-      Console.WriteLine(ex);
+      logger.LogError(ex, "Could not create the subcategory");
       return BadRequest("Could not create the subcategory");
     }
 
@@ -75,7 +68,7 @@ public class SubcategoriesController : ControllerBase
     if (subcategory == null || string.IsNullOrWhiteSpace(subcategory.Name))
       return BadRequest("Subcategory name cannot be empty");
 
-    var updatedSubcategory = await _subcategoryService.UpdateSubcategoryAsync(subcategory);
+    var updatedSubcategory = await subcategoryService.UpdateSubcategoryAsync(subcategory);
 
     if (updatedSubcategory == null) return NotFound();
 
@@ -86,7 +79,7 @@ public class SubcategoriesController : ControllerBase
   [Route("delete/{id}")]
   public async Task<IActionResult> DeleteSubcategory(int id)
   {
-    var success = await _subcategoryService.DeleteSubcategoryAsync(id);
+    var success = await subcategoryService.DeleteSubcategoryAsync(id);
 
     if (!success) return NotFound();
 

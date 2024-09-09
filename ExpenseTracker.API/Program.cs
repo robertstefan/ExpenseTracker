@@ -1,10 +1,13 @@
-using ExpenseTracker.Core.Configuration;
 using ExpenseTracker.API.Services;
+using ExpenseTracker.Core.Configuration;
 using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Data.Configuration;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

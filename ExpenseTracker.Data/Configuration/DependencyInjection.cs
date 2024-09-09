@@ -28,8 +28,8 @@ public static class DependencyInjection
       new UserRepository(configuration.GetConnectionString("DefaultConnection")!));
     services.AddStackExchangeRedisCache(options =>
     {
-      options.Configuration = "localhost:6379";  // Redis connection string
-      options.InstanceName = "RedisExchangeRates_";  // Optional: a prefix for keys
+      options.Configuration = "localhost:6379"; // Redis connection string
+      options.InstanceName = "RedisExchangeRates_"; // Optional: a prefix for keys
     });
 
 

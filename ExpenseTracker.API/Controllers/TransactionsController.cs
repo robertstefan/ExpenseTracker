@@ -10,29 +10,24 @@ namespace ExpenseTracker.API.Controllers;
 
 [Route("api/transactions")]
 [ApiController]
-public class TransactionsController : ControllerBase
+public class TransactionsController(
+  TransactionService transactionService,
+  ICurrencyExchangeProvider _exchangeRateProvider,
+  ILogger<TransactionsController> logger)
+  : ControllerBase
 {
-  private readonly TransactionService _transactionService;
-  private readonly ICurrencyExchangeProvider _exchangeRateProvider;
-
-  public TransactionsController(TransactionService transactionService, ICurrencyExchangeProvider _exchangeRateProvider)
-  {
-    _transactionService = transactionService;
-    this._exchangeRateProvider = _exchangeRateProvider;
-  }
-
   [HttpGet]
   [Route("list-all")]
   public async Task<ActionResult<List<Transaction>>> GetAllTransactions()
   {
-    return (await _transactionService.GetAllTransactionsAsync()).ToList();
+    return (await transactionService.GetAllTransactionsAsync()).ToList();
   }
 
   [HttpGet]
   [Route("{id}")]
   public async Task<ActionResult<Transaction>> GetTransaction(Guid id)
   {
-    var transaction = await _transactionService.GetTransactionByIdAsync(id);
+    var transaction = await transactionService.GetTransactionByIdAsync(id);
 
     if (transaction == null) return NotFound();
 
@@ -43,7 +38,7 @@ public class TransactionsController : ControllerBase
   [Route("get-by-type/:type")]
   public async Task<ActionResult<IEnumerable<Transaction>>> GetByType(TransactionType type)
   {
-    return (await _transactionService.GetTransactionsByTypeAsync(type)).ToList();
+    return (await transactionService.GetTransactionsByTypeAsync(type)).ToList();
   }
 
   [Authorize]
@@ -68,10 +63,10 @@ public class TransactionsController : ControllerBase
 
     try
     {
-      Console.WriteLine(_exchangeRateProvider);
-      double exchangeRate = _exchangeRateProvider[transactionModel.Currency] != 0 ?
-        _exchangeRateProvider[transactionModel.Currency] : 1.0;
-      result = await _transactionService.AddTransactionAsync(new Transaction
+      var exchangeRate = _exchangeRateProvider[transactionModel.Currency] != 0
+        ? _exchangeRateProvider[transactionModel.Currency]
+        : 1.0;
+      result = await transactionService.AddTransactionAsync(new Transaction
       {
         Amount = transactionModel.Amount,
         CategoryId = transactionModel.CategoryId,
@@ -87,8 +82,7 @@ public class TransactionsController : ControllerBase
     }
     catch (Exception ex)
     {
-      // @TODO - LOG THE ERROR
-      Console.WriteLine(ex);
+      logger.LogError(ex, "Could not register the transaction");
       return BadRequest("Could not register the transaction");
     }
 
@@ -101,8 +95,7 @@ public class TransactionsController : ControllerBase
   {
     if (transaction == null) return BadRequest();
 
-
-    var updated = await _transactionService.UpdateTransactionAsync(transaction);
+    var updated = await transactionService.UpdateTransactionAsync(transaction);
     // Repo returns null if no transaction is found
     if (updated == null) return NotFound();
     return Ok(updated);
@@ -112,7 +105,7 @@ public class TransactionsController : ControllerBase
   [Route("delete/{id}")]
   public async Task<IActionResult> DeleteTransaction(Guid Id)
   {
-    var succes = await _transactionService.DeleteTransactionAsync(Id);
+    var succes = await transactionService.DeleteTransactionAsync(Id);
     if (!succes) return NotFound();
 
     return Ok();

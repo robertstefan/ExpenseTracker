@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace ExpenseTracker.API.Controllers;
 
 [Microsoft.AspNetCore.Components.Route("api/auth")]
-public class AuthController(AuthService _authService) : ControllerBase
+public class AuthController(AuthService _authService, ILogger<AuthController> logger) : ControllerBase
 {
   [AllowAnonymous]
   [HttpPost("login")]
@@ -45,8 +45,7 @@ public class AuthController(AuthService _authService) : ControllerBase
 
       if (authResponse is null)
       {
-        Console.WriteLine("NULL");
-        Console.WriteLine("User could not be added");
+        logger.LogError("User could not be created, auth response is null");
         return NoContent();
       }
 
@@ -54,8 +53,7 @@ public class AuthController(AuthService _authService) : ControllerBase
     }
     catch (Exception ex)
     {
-      Console.WriteLine(ex);
-      Console.WriteLine("User could not be added");
+      logger.LogError(ex, "User could not be created");
       return BadRequest("User could not be created");
     }
   }

@@ -7,27 +7,21 @@ namespace ExpenseTracker.API.Controllers;
 
 [Route("api/categories")]
 [ApiController]
-public class CategoriesController : ControllerBase
+public class CategoriesController(CategoryService categoryService, ILogger<CategoriesController> logger)
+  : ControllerBase
 {
-  private readonly CategoryService _categoryService;
-
-  public CategoriesController(CategoryService categoryService)
-  {
-    _categoryService = categoryService;
-  }
-
   [HttpGet]
   [Route("list-all")]
   public async Task<ActionResult<List<Category>>> GetAllCategories()
   {
-    return (await _categoryService.GetAllCategoriesAsync()).ToList();
+    return (await categoryService.GetAllCategoriesAsync()).ToList();
   }
 
   [HttpGet]
   [Route("{id}")]
   public async Task<ActionResult<Category>> GetCategory(int id)
   {
-    var category = await _categoryService.GetCategoryByIdAsync(id);
+    var category = await categoryService.GetCategoryByIdAsync(id);
 
     if (category == null) return NotFound();
 
@@ -46,12 +40,11 @@ public class CategoriesController : ControllerBase
 
     try
     {
-      categoryId = await _categoryService.AddCategoryAsync(category);
+      categoryId = await categoryService.AddCategoryAsync(category);
     }
     catch (Exception ex)
     {
-      // @TODO - LOG THE ERROR
-      Console.WriteLine(ex);
+      logger.LogError(ex, "Could not create the category");
       return BadRequest("Could not create the category");
     }
 
@@ -65,7 +58,7 @@ public class CategoriesController : ControllerBase
     if (category == null) return BadRequest();
     if (string.IsNullOrWhiteSpace(category.Name)) return BadRequest("Category name cannot be empty");
 
-    var updatedCategory = await _categoryService.UpdateCategoryAsync(category);
+    var updatedCategory = await categoryService.UpdateCategoryAsync(category);
 
     if (updatedCategory == null) return NotFound();
 
@@ -76,7 +69,7 @@ public class CategoriesController : ControllerBase
   [Route("delete/{id}")]
   public async Task<IActionResult> DeleteCategory(int id)
   {
-    var success = await _categoryService.DeleteCategoryAsync(id);
+    var success = await categoryService.DeleteCategoryAsync(id);
 
     if (!success) return NotFound();
 

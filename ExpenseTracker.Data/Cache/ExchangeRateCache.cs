@@ -7,8 +7,8 @@ namespace ExpenseTracker.Data.Cache;
 public class ExchangeRatesCache : IExchangeRatesCache
 {
   private readonly IDistributedCache _cache;
-  private readonly string _cacheKey = "ExchangeRates";
   private readonly TimeSpan _cacheExpiration = TimeSpan.FromHours(24); // Cache for 24 hours
+  private readonly string _cacheKey = "ExchangeRates";
 
   public ExchangeRatesCache(IDistributedCache cache)
   {
@@ -28,10 +28,7 @@ public class ExchangeRatesCache : IExchangeRatesCache
   public async Task<Dictionary<string, double>?> GetExchangeRatesAsync()
   {
     var serializedRates = await _cache.GetStringAsync(_cacheKey);
-    if (string.IsNullOrEmpty(serializedRates))
-    {
-      return null;
-    }
+    if (string.IsNullOrEmpty(serializedRates)) return null;
 
     return JsonSerializer.Deserialize<Dictionary<string, double>>(serializedRates);
   }

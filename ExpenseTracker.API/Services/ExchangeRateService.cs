@@ -1,18 +1,12 @@
-using ExpenseTracker.Core.Interfaces;
 using System.Xml.Serialization;
-using ExpenseTracker.API.Services;
 using ExpenseTracker.Core.Services;
 
-public class ExchangeRatesService : BackgroundService
-{
-  private readonly IServiceProvider _serviceProvider;
-  private readonly TimeSpan _scheduledTime;
+namespace ExpenseTracker.API.Services;
 
-  public ExchangeRatesService(IServiceProvider serviceProvider)
-  {
-    _serviceProvider = serviceProvider;
-    _scheduledTime = TimeSpan.Parse("13:00"); // Set the time you want the service to run
-  }
+public class ExchangeRatesService(IServiceProvider serviceProvider, ILogger<ExchangeRatesService> logger)
+  : BackgroundService
+{
+  private readonly TimeSpan _scheduledTime = TimeSpan.Parse("13:00"); // Set the time you want the service to run
 
   protected override async Task ExecuteAsync(CancellationToken stoppingToken)
   {
@@ -28,13 +22,10 @@ public class ExchangeRatesService : BackgroundService
         nextRun = nextRun.AddDays(1);
 
       var delay = nextRun - now;
-      Console.WriteLine($"Next run scheduled at {nextRun}");
+      logger.LogInformation($"Next run scheduled at {nextRun}");
 
       await Task.Delay(delay, stoppingToken);
-      if (!stoppingToken.IsCancellationRequested)
-      {
-        await RunUpdateAsync(stoppingToken);
-      }
+      if (!stoppingToken.IsCancellationRequested) await RunUpdateAsync(stoppingToken);
     }
   }
 
@@ -42,52 +33,47 @@ public class ExchangeRatesService : BackgroundService
   {
     try
     {
-      Console.WriteLine("Starting exchange rate update.");
+      logger.LogInformation("Starting exchange rate update.");
 
-      using (var client = new HttpClient())
+      using var client = new HttpClient();
+      var xmlData = await client.GetStringAsync("https://www.bnr.ro/nbrfxrates.xml", stoppingToken);
+
+      var serializer = new XmlSerializer(typeof(DataSet));
+      DataSet exchangeRates;
+
+      using (var reader = new StringReader(xmlData))
       {
-        string xmlData = await client.GetStringAsync("https://www.bnr.ro/nbrfxrates.xml");
+        exchangeRates = (DataSet)serializer.Deserialize(reader);
+      }
 
-        XmlSerializer serializer = new XmlSerializer(typeof(DataSet));
-        DataSet exchangeRates;
-
-        using (var reader = new StringReader(xmlData))
+      var rates = exchangeRates?.Body?.Cube?.Rate;
+      using (var scope = serviceProvider.CreateScope())
+      {
+        var exchangeRateCache = scope.ServiceProvider.GetRequiredService<IExchangeRatesCache>();
+        if (rates != null)
         {
-          exchangeRates = (DataSet)serializer.Deserialize(reader);
+          var exchangeRatesDictionary = new Dictionary<string, double>
+          {
+            ["RON"] = 1.0d
+          };
+
+          foreach (var rate in rates)
+            exchangeRatesDictionary[rate.currency] =
+              (double)(rate.multiplierSpecified ? rate.Value * rate.multiplier : rate.Value);
+
+          await exchangeRateCache.SetExchangeRatesAsync(exchangeRatesDictionary);
+
+          logger.LogInformation("Exchange rates updated successfully.");
         }
-
-        DataSetBodyCubeRate[]? rates = exchangeRates?.Body?.Cube?.Rate;
-        using (var scope = _serviceProvider.CreateScope())
+        else
         {
-          var exchangeRateCache = scope.ServiceProvider.GetRequiredService<IExchangeRatesCache>();
-          if (rates != null)
-          {
-            var exchangeRatesDictionary = new Dictionary<string, double>
-            {
-              ["RON"] = 1.0d
-            };
-
-            foreach (var rate in rates)
-            {
-              exchangeRatesDictionary[rate.currency] =
-                (double)(rate.multiplierSpecified ? rate.Value * rate.multiplier : rate.Value);
-            }
-
-            await exchangeRateCache.SetExchangeRatesAsync(exchangeRatesDictionary);
-
-            Console.WriteLine("Exchange rates updated successfully.");
-          }
-          else
-          {
-            Console.WriteLine("No rates found in the response.");
-          }
+          logger.LogCritical("No rates found in the response.");
         }
       }
     }
     catch (Exception ex)
     {
-      Console.WriteLine(ex);
-      Console.WriteLine("Error updating exchange rates.");
+      logger.LogError(ex, "Error updating exchange rates.");
     }
   }
 }

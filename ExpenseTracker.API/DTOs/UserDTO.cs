@@ -15,7 +15,7 @@ public class UserDTO
     var errors = new Dictionary<string, string>();
 
     if (string.IsNullOrEmpty(Username)) errors.Add(nameof(Username), "Username cannot be null or empty.");
-    
+
     if (Username.Length > 15) errors.Add(nameof(Username), "Username is too long. Maximum 15 characters allowed.");
 
     if (string.IsNullOrEmpty(Email))
@@ -23,11 +23,11 @@ public class UserDTO
     else if (!IsValidEmail(Email)) errors.Add(nameof(Email), "Email format is invalid.");
 
     if (string.IsNullOrEmpty(LastName)) errors.Add(nameof(LastName), "Last name cannot be null or empty.");
-    
+
     if (LastName.Length > 50) errors.Add(nameof(LastName), "Last name is too long. Maximum 50 characters allowed.");
 
     if (string.IsNullOrEmpty(FirstName)) errors.Add(nameof(FirstName), "First name cannot be null or empty.");
-    
+
     if (FirstName.Length > 50) errors.Add(nameof(FirstName), "First name is too long. Maximum 50 characters allowed.");
 
     if (string.IsNullOrEmpty(Password))

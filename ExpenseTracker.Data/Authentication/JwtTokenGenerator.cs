@@ -28,8 +28,8 @@ public class JwtTokenGenerator(JwtSettings _jwtSettings) : IJwtTokenGenerator
     };
 
     var securityToken = new JwtSecurityToken(
-      issuer: _jwtSettings.Issuer,
-      audience: _jwtSettings.Audience,
+      _jwtSettings.Issuer,
+      _jwtSettings.Audience,
       expires: DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes),
       claims: claims,
       signingCredentials: signingCredentials);

@@ -18,10 +18,8 @@ public class TransactionDTO
   public double ExchangeRate { get; set; } = 1.0d;
 
 
-
   // using attribute to validate, so I don't have to do it everywhere I create a model/take user input
-  [ValidTransactionType]
-  public TransactionType Type { get; set; }
+  [ValidTransactionType] public TransactionType Type { get; set; }
 
   public int CategoryId { get; set; }
   public int SubcategoryId { get; set; }

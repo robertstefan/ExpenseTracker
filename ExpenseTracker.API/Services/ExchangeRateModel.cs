@@ -1,133 +1,132 @@
+using System.ComponentModel;
+using System.Xml.Serialization;
+
 namespace ExpenseTracker.API.Services;
 
 // NOTE: Generated code may require at least .NET Framework 4.5 or .NET Core/Standard 2.0.
-/// <remarks/>
-[System.SerializableAttribute()]
-[System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
-[System.Xml.Serialization.XmlRootAttribute(Namespace = "http://www.bnr.ro/xsd", IsNullable = false)]
-public partial class DataSet
+/// <remarks />
+[SerializableAttribute]
+[DesignerCategory("code")]
+[XmlType(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
+[XmlRoot(Namespace = "http://www.bnr.ro/xsd", IsNullable = false)]
+public class DataSet
 {
+  private DataSetBody bodyField;
   private DataSetHeader headerField;
 
-  private DataSetBody bodyField;
-
-  /// <remarks/>
+  /// <remarks />
   public DataSetHeader Header
   {
-    get { return this.headerField; }
-    set { this.headerField = value; }
+    get => headerField;
+    set => headerField = value;
   }
 
-  /// <remarks/>
+  /// <remarks />
   public DataSetBody Body
   {
-    get { return this.bodyField; }
-    set { this.bodyField = value; }
+    get => bodyField;
+    set => bodyField = value;
   }
 }
 
-/// <remarks/>
-[System.SerializableAttribute()]
-[System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
-public partial class DataSetHeader
+/// <remarks />
+[SerializableAttribute]
+[DesignerCategory("code")]
+[XmlType(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
+public class DataSetHeader
 {
+  private string messageTypeField;
   private string publisherField;
 
-  private System.DateTime publishingDateField;
+  private DateTime publishingDateField;
 
-  private string messageTypeField;
-
-  /// <remarks/>
+  /// <remarks />
   public string Publisher
   {
-    get { return this.publisherField; }
-    set { this.publisherField = value; }
+    get => publisherField;
+    set => publisherField = value;
   }
 
-  /// <remarks/>
-  [System.Xml.Serialization.XmlElementAttribute(DataType = "date")]
-  public System.DateTime PublishingDate
+  /// <remarks />
+  [XmlElement(DataType = "date")]
+  public DateTime PublishingDate
   {
-    get { return this.publishingDateField; }
-    set { this.publishingDateField = value; }
+    get => publishingDateField;
+    set => publishingDateField = value;
   }
 
-  /// <remarks/>
+  /// <remarks />
   public string MessageType
   {
-    get { return this.messageTypeField; }
-    set { this.messageTypeField = value; }
+    get => messageTypeField;
+    set => messageTypeField = value;
   }
 }
 
-/// <remarks/>
-[System.SerializableAttribute()]
-[System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
-public partial class DataSetBody
+/// <remarks />
+[SerializableAttribute]
+[DesignerCategory("code")]
+[XmlType(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
+public class DataSetBody
 {
-  private string subjectField;
-
-  private string origCurrencyField;
-
   private DataSetBodyCube cubeField;
 
-  /// <remarks/>
+  private string origCurrencyField;
+  private string subjectField;
+
+  /// <remarks />
   public string Subject
   {
-    get { return this.subjectField; }
-    set { this.subjectField = value; }
+    get => subjectField;
+    set => subjectField = value;
   }
 
-  /// <remarks/>
+  /// <remarks />
   public string OrigCurrency
   {
-    get { return this.origCurrencyField; }
-    set { this.origCurrencyField = value; }
+    get => origCurrencyField;
+    set => origCurrencyField = value;
   }
 
-  /// <remarks/>
+  /// <remarks />
   public DataSetBodyCube Cube
   {
-    get { return this.cubeField; }
-    set { this.cubeField = value; }
+    get => cubeField;
+    set => cubeField = value;
   }
 }
 
-/// <remarks/>
-[System.SerializableAttribute()]
-[System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
-public partial class DataSetBodyCube
+/// <remarks />
+[SerializableAttribute]
+[DesignerCategory("code")]
+[XmlType(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
+public class DataSetBodyCube
 {
+  private DateTime dateField;
   private DataSetBodyCubeRate[] rateField;
 
-  private System.DateTime dateField;
-
-  /// <remarks/>
-  [System.Xml.Serialization.XmlElementAttribute("Rate")]
+  /// <remarks />
+  [XmlElement("Rate")]
   public DataSetBodyCubeRate[] Rate
   {
-    get { return this.rateField; }
-    set { this.rateField = value; }
+    get => rateField;
+    set => rateField = value;
   }
 
-  /// <remarks/>
-  [System.Xml.Serialization.XmlAttributeAttribute(DataType = "date")]
-  public System.DateTime date
+  /// <remarks />
+  [XmlAttribute(DataType = "date")]
+  public DateTime date
   {
-    get { return this.dateField; }
-    set { this.dateField = value; }
+    get => dateField;
+    set => dateField = value;
   }
 }
 
-/// <remarks/>
-[System.SerializableAttribute()]
-[System.ComponentModel.DesignerCategoryAttribute("code")]
-[System.Xml.Serialization.XmlTypeAttribute(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
-public partial class DataSetBodyCubeRate
+/// <remarks />
+[SerializableAttribute]
+[DesignerCategory("code")]
+[XmlType(AnonymousType = true, Namespace = "http://www.bnr.ro/xsd")]
+public class DataSetBodyCubeRate
 {
   private string currencyField;
 
@@ -137,35 +136,35 @@ public partial class DataSetBodyCubeRate
 
   private decimal valueField;
 
-  /// <remarks/>
-  [System.Xml.Serialization.XmlAttributeAttribute()]
+  /// <remarks />
+  [XmlAttribute]
   public string currency
   {
-    get { return this.currencyField; }
-    set { this.currencyField = value; }
+    get => currencyField;
+    set => currencyField = value;
   }
 
-  /// <remarks/>
-  [System.Xml.Serialization.XmlAttributeAttribute()]
+  /// <remarks />
+  [XmlAttribute]
   public byte multiplier
   {
-    get { return this.multiplierField; }
-    set { this.multiplierField = value; }
+    get => multiplierField;
+    set => multiplierField = value;
   }
 
-  /// <remarks/>
-  [System.Xml.Serialization.XmlIgnoreAttribute()]
+  /// <remarks />
+  [XmlIgnore]
   public bool multiplierSpecified
   {
-    get { return this.multiplierFieldSpecified; }
-    set { this.multiplierFieldSpecified = value; }
+    get => multiplierFieldSpecified;
+    set => multiplierFieldSpecified = value;
   }
 
-  /// <remarks/>
-  [System.Xml.Serialization.XmlTextAttribute()]
+  /// <remarks />
+  [XmlText]
   public decimal Value
   {
-    get { return this.valueField; }
-    set { this.valueField = value; }
+    get => valueField;
+    set => valueField = value;
   }
 }
