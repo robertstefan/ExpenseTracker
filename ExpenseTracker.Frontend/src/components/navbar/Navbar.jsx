@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Group, Code, Text } from '@mantine/core';
-import { IconLogout, IconDashboard, IconCategory } from '@tabler/icons-react';
+import { IconLogout, IconDashboard, IconCategory, IconUsersGroup } from '@tabler/icons-react';
 import classes from './Navbar.module.css';
 
 const data = [
 	{ link: '/', label: 'Dashboard', icon: IconDashboard },
 	{ link: '/category', label: 'Categories', icon: IconCategory },
+	{ link: '/user', label: 'Users', icon: IconUsersGroup },
 ];
 
 export default function Navbar() {
@@ -31,7 +32,7 @@ export default function Navbar() {
 		<nav className={classes.navbar}>
 			<div className={classes.navbarMain}>
 				<Group className={classes.header} justify='space-between'>
-					<Text c='#fff'>Expense Tracker</Text>
+					<Text c='#fff'>Admin Panel</Text>
 					<Code fw={700} className={classes.version}>
 						v1.0.0
 					</Code>

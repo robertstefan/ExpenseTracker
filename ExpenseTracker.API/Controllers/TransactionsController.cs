@@ -5,6 +5,7 @@ using ExpenseTracker.API.DTOs;
 using ExpenseTracker.API.Requests.Common;
 using ExpenseTracker.API.Requests.Transactions;
 using ExpenseTracker.Core.Common.Enums;
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,7 +15,10 @@ using Serilog;
 namespace ExpenseTracker.API.Controllers;
 
 [Route("api/transactions")]
-public class TransactionsController(TransactionService _transactionService, IOptions<SoftDeleteSettings> softDeleteSettings) : ApiController
+public class TransactionsController(
+    TransactionService _transactionService,
+    IOptions<SoftDeleteSettings> softDeleteSettings,
+    ICurrencyExchangeProvider _exchangeProvider) : ApiController
 {
   private readonly SoftDeleteSettings _softDeleteSettings = softDeleteSettings.Value;
 
@@ -63,6 +67,14 @@ public class TransactionsController(TransactionService _transactionService, IOpt
     }
   }
 
+  [HttpPost("check-currencies")]
+  public IActionResult Check()
+  {
+    bool currencyOutdated = (DateTime.Now - _exchangeProvider.SetDate).TotalDays > 1;
+
+    return Ok(new { _exchangeProvider.ExchangeRates, _exchangeProvider.SetDate, currencyOutdated });
+  }
+
   [HttpPost("create")]
   public async Task<ActionResult<Transaction>> AddTransaction(CreateTransactionRequest transactionModel)
   {
@@ -75,6 +87,7 @@ public class TransactionsController(TransactionService _transactionService, IOpt
 
     try
     {
+
       TransactionType transactionTypeEnum = IntToEnum.Handle<TransactionType>(transactionModel.TransactionType)!.Value;
 
       var transaction = Transaction.CreateNew(
@@ -84,7 +97,8 @@ public class TransactionsController(TransactionService _transactionService, IOpt
         transactionModel.CategoryId,
         transactionModel.IsRecurrent,
         transactionTypeEnum,
-        transactionModel.UserId
+        transactionModel.UserId,
+        transactionModel.Currency
       );
       Guid result = await _transactionService.AddTransactionAsync(transaction);
 

@@ -1,18 +1,18 @@
-namespace ExpenseTracker.API.Common.Options
+namespace ExpenseTracker.API.Common.Options;
+
+public class SoftDeleteSettings
 {
-    public class SoftDeleteSettings
+    public const string SoftDeleteKey = GlobalConstants.ConfigurationKeys.SoftDelete;
+
+    public bool SoftDelete { get; set; }
+
+    public SoftDeleteSettings(IConfiguration configuration)
     {
-        public const string SoftDeleteKey = GlobalConstants.ConfigurationKeys.SoftDelete;
+        configuration.GetSection(SoftDeleteKey).Bind(this);
+    }
 
-        public bool SoftDelete { get; set; }
-
-        public SoftDeleteSettings(IConfiguration configuration)
-        {
-            configuration.GetSection(SoftDeleteKey).Bind(this);
-        }
-
-        public SoftDeleteSettings()
-        {
-        }
+    public SoftDeleteSettings()
+    {
     }
 }
+

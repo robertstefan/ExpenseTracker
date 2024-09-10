@@ -1,13 +1,16 @@
 using System.Data.SqlClient;
 using Dapper;
-using ExpenseTracker.Core.Interfaces;
+using ExpenseTracker.Core.Common.Pagination;
+using ExpenseTracker.Core.Interfaces.UserContracts;
 using ExpenseTracker.Core.Models;
+using static ExpenseTracker.Core.Common.Pagination.PagedMethods;
 
-namespace ExpenseTracker.Data.Repositories;
+namespace ExpenseTracker.Data.Repositories.UserRepositories;
 
-public class UserRepository(string _connectionString) : IUserRepository
+public class UserManagementRepository(string _connectionString) : IUserManagementRepository
 {
     private const string TableName = "[Users]";
+
     public async Task<User?> AddUserAsync(User user)
     {
         using var connection = new SqlConnection(_connectionString);
@@ -20,13 +23,38 @@ public class UserRepository(string _connectionString) : IUserRepository
         return createdUser;
     }
 
-    public async Task<IEnumerable<User>> GetUsersPaginatedAsync(int PageNumber, int PageSize)
+    public async Task<PaginatedResponse<User>> GetUsersPaginatedAsync(int PageNumber, int PageSize)
     {
         using var connection = new SqlConnection(_connectionString);
-        string sql = $"SELECT Id, Username, Email, FirstName, LastName FROM {TableName}";
-        var users = await connection.QueryAsync<User>(sql);
 
-        return users;
+        int Offset = OffsetMethods.GetOffsetByPageSize(PageNumber, PageSize);
+
+        string sql = @$"SELECT Count(0) [Count]
+                        FROM {TableName}
+                        WHERE IsDeleted = 0
+
+                        SELECT 
+                        *
+                        FROM {TableName}
+                        WHERE IsDeleted = 0
+                        ORDER BY 
+                        Id
+                        ASC
+                        OFFSET @Offset ROWS
+                        FETCH NEXT @PageSize
+                        ROWS ONLY";
+
+        var multi = await connection.QueryMultipleAsync(sql, new { Offset, PageSize });
+
+        var totalCount = multi.Read<int>().Single();
+
+        var items = multi.Read<User>().ToList();
+
+        return new PaginatedResponse<User>
+        {
+            TotalCount = totalCount,
+            Rows = items
+        };
     }
 
     public async Task<User?> GetUserByEmailAsync(string email)
@@ -82,81 +110,5 @@ public class UserRepository(string _connectionString) : IUserRepository
         var affectedRows = await connection.ExecuteAsync(sql, user);
 
         return affectedRows == 1;
-    }
-
-    public async Task IncrementFailedLoginAttemptsAsync(Guid userId)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        string sql = $@"UPDATE {TableName} SET
-                        LoginTries = LoginTries + 1
-                        WHERE Id = @Id";
-
-        await connection.ExecuteAsync(sql, new { Id = userId });
-    }
-
-    public async Task LockUserAsync(Guid userId)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        string sql = $@"UPDATE {TableName} SET
-                        LockedOut = 1
-                        WHERE Id = @Id";
-
-        await connection.ExecuteAsync(sql, new { Id = userId });
-    }
-
-    public async Task ResetLoginAttemptsAsync(Guid userId)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        string sql = $@"UPDATE {TableName} SET
-                        LoginTries = 0
-                        WHERE Id = @Id";
-
-        await connection.ExecuteAsync(sql, new { Id = userId });
-    }
-
-    public async Task UnlockUserAsync(Guid userId)
-    {
-        using var connection = new SqlConnection(_connectionString);
-
-        string sql = $@"UPDATE {TableName} SET
-                        LockedOut = 0
-                        WHERE Id = @Id";
-
-        await connection.ExecuteAsync(sql, new { Id = userId });
-    }
-
-    public async Task<bool> ResetPassword(Guid userId, string password)
-    {
-
-        using var connection = new SqlConnection(_connectionString);
-
-        string sql = $@"UPDATE {TableName} SET
-                        PasswordHash = @Password,
-                        UpdatedDateTime = GETDATE()
-                        WHERE Id = @UserId";
-
-        var affectedRows = await connection.ExecuteAsync(sql, new { UserId = userId, Password = password });
-
-        return affectedRows == 1;
-    }
-
-    public async Task<bool> ChangeEmail(Guid UserId, string Email)
-    {
-
-        using var connection = new SqlConnection(_connectionString);
-
-        string sql = $@"UPDATE {TableName} SET
-                        Email = @Email,
-                        UpdatedDateTime = GETDATE()
-                        WHERE Id = @UserId";
-
-        var affectedRows = await connection.ExecuteAsync(sql, new { UserId = UserId, Email = Email });
-
-        return affectedRows == 1;
-
-
     }
 }

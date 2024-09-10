@@ -1,14 +1,18 @@
+using System.Text.RegularExpressions;
 using ExpenseTracker.API.Requests.Common;
 using ExpenseTracker.Core.Common.Enums;
 
 namespace ExpenseTracker.API.Requests.Transactions;
-public record CreateTransactionRequest(string Description,
-                                       decimal Amount,
-                                       DateTime Date,
-                                       Guid CategoryId,
-                                       bool IsRecurrent,
-                                       int TransactionType,
-                                       Guid UserId) : ValidationMiddleware
+public partial record CreateTransactionRequest(
+    string Description,
+    decimal Amount,
+    DateTime Date,
+    Guid CategoryId,
+    bool IsRecurrent,
+    int TransactionType,
+    Guid UserId,
+    string Currency,
+    double ExchangeRate) : ValidationMiddleware
 {
     protected override Dictionary<string, string> Validate()
     {
@@ -49,6 +53,14 @@ public record CreateTransactionRequest(string Description,
             errors[nameof(TransactionType)] = "This transaction type is not supported or wrong";
         }
 
+        if (!LettersOnly().IsMatch(Currency))
+        {
+            errors[nameof(TransactionType)] = "No special characters allowed !";
+        }
+
         return errors;
     }
+
+    [GeneratedRegex("^[a-zA-Z]+$")]
+    private static partial Regex LettersOnly();
 }

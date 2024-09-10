@@ -15,6 +15,8 @@ public class Transaction : IEntity
   public bool IsRecurrent { get; private set; }
   public bool IsDeleted { get; private set; }
   public Guid UserId { get; private set; }
+  public string Currency { get; private set; }
+  public double ExchangeRate { get; set; }
   public DateTimeOffset? CreatedDateTime { get; private set; }
   public DateTimeOffset? UpdatedDateTime { get; private set; }
 
@@ -35,6 +37,8 @@ public class Transaction : IEntity
       TransactionType transactionType,
       Guid userId,
       Category? category,
+      string currency = "RON",
+      double exchangeRate = 1.0d,
       DateTimeOffset? createdDateTime = null,
       DateTimeOffset? updatedDateTime = null)
   {
@@ -47,6 +51,8 @@ public class Transaction : IEntity
     TransactionType = transactionType;
     UserId = userId;
     _category = category;
+    Currency = currency;
+    ExchangeRate = exchangeRate;
     CreatedDateTime = createdDateTime;
     UpdatedDateTime = updatedDateTime;
   }
@@ -58,7 +64,9 @@ public class Transaction : IEntity
       Guid categoryId,
       bool isRecurrent,
       TransactionType transactionType,
-            Guid userId,
+      Guid userId,
+      string currency = "RON",
+      double exchangeRate = 1.0d,
       Category? category = null)
   {
     return new(
@@ -70,7 +78,9 @@ public class Transaction : IEntity
       isRecurrent,
       transactionType,
       userId,
-      category
+      category,
+      currency,
+      exchangeRate
     );
   }
 
@@ -84,6 +94,8 @@ public class Transaction : IEntity
       TransactionType transactionType,
       Guid userId,
       Category? category = null,
+      string currency = "RON",
+      double exchangeRate = 1.0d,
       DateTimeOffset? createdDateTime = null,
       DateTimeOffset? updatedDateTime = null)
   {
@@ -97,6 +109,8 @@ public class Transaction : IEntity
       transactionType,
       userId,
       category,
+      currency,
+      exchangeRate,
       createdDateTime,
       updatedDateTime
     );

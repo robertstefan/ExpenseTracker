@@ -1,0 +1,37 @@
+:root {
+  --mantine-color-white: #ffffff;
+  --mantine-color-dark-6: #1a1b1e;
+  --mantine-color-gray-1: #f1f1f1;
+  --mantine-color-dark-4: #2c2d30;
+  --mantine-shadow-md: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  --mantine-color-pink-filled: #ff4d6d;
+  --mantine-color-orange-filled: #ff8c00;
+}
+
+.root {
+  background-color: light-dark(var(--mantine-color-white), var(--mantine-color-dark-6));
+  box-shadow: var(--mantine-shadow-md);
+  border: 0.0625rem solid light-dark(var(--mantine-color-gray-1), var(--mantine-color-dark-4));}
+
+.indicator {
+  background-image: linear-gradient(
+    to right,
+    var(--mantine-color-pink-filled),
+    var(--mantine-color-orange-filled)
+  );
+}
+
+.control {
+  &::before {
+    display: none;
+  }
+}
+
+.label {
+  &,
+  &:hover {
+    &[data-active] {
+      color: var(--mantine-color-white);
+    }
+  }
+}

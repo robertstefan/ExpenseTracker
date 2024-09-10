@@ -19,8 +19,8 @@ public class TransactionsRespository(string _connectionString) : ITransactionRep
     using var connection = new SqlConnection(_connectionString);
 
     string sql = @$"INSERT INTO {TableName}
-                      (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType, CreatedDateTime, IsDeleted, UserId)
-                      VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @TransactionType, GETDATE(), @IsDeleted, @UserId)";
+                      (Id, Description, Amount, Date, CategoryId, IsRecurrent, TransactionType, CreatedDateTime, Currency, IsDeleted, UserId)
+                      VALUES (@Id, @Description, @Amount, @Date, @CategoryId, @IsRecurrent, @TransactionType, GETDATE(), @Currency, @IsDeleted, @UserId)";
 
     int affectedRows = await connection.ExecuteAsync(sql, transaction);
 
@@ -87,6 +87,8 @@ public class TransactionsRespository(string _connectionString) : ITransactionRep
                 transaction.TransactionType,
                 transaction.UserId,
                 category,
+                transaction.Currency,
+                transaction.ExchangeRate,
                 transaction.CreatedDateTime,
                 transaction.UpdatedDateTime
               );
@@ -122,18 +124,19 @@ public class TransactionsRespository(string _connectionString) : ITransactionRep
       (transaction, category) =>
       {
         return Transaction.Create(
-                transaction.Id,
-                transaction.Description,
-                transaction.Amount,
-                transaction.Date,
-                transaction.CategoryId,
-                transaction.IsRecurrent,
-                transaction.TransactionType,
-                transaction.UserId,
-                category,
-                transaction.CreatedDateTime,
-                transaction.UpdatedDateTime
-        );
+            transaction.Id,
+            transaction.Description,
+            transaction.Amount,
+            transaction.Date,
+            transaction.CategoryId,
+            transaction.IsRecurrent,
+            transaction.TransactionType,
+            transaction.UserId,
+            category,
+            transaction.Currency,
+            transaction.ExchangeRate,
+            transaction.CreatedDateTime,
+            transaction.UpdatedDateTime);
       },
       splitOn: "CategorySplitId"
     ).FirstOrDefault();
@@ -164,7 +167,8 @@ public class TransactionsRespository(string _connectionString) : ITransactionRep
                     TransactionType = @TransactionType,
                     IsRecurrent = @IsRecurrent,
                     IsDeleted = @IsDeleted,
-                    UpdatedDateTime = GETDATE()
+                    UpdatedDateTime = GETDATE(),
+                    Currency = @Currency
                     WHERE Id = @Id
                     AND IsDeleted = 0";
 

@@ -10,7 +10,6 @@ export default function Category() {
 	const { data: categories = {}, isLoading: isLoadingCategories } = useGetCategoriesQuery();
 
 	const [deleteCategory, deleteCategoryResult] = useDeleteCategoryMutation();
-	console.log(deleteCategoryResult);
 
 	return (
 		<>
@@ -31,20 +30,20 @@ export default function Category() {
 				<Table.Tbody>
 					{categories.items?.map((c) => {
 						return (
-							<Table.Tr className='cursor-pointer' key={c.id}>
+							<Table.Tr className='cursor-pointer' key={c.id} onClick={() => navigate(c.id)}>
 								<Table.Td>{c.id}</Table.Td>
 								<Table.Td>{c.name}</Table.Td>
 								<Table.Td>
 									<ActionIcon>
 										<IconTrash
-											onClick={() =>
+											onClick={(e) => {
+												e.stopPropagation();
 												Swal.fire({
 													title: 'Are you sure ?',
 													text: 'You are about to delete the category ' + c.name,
 													icon: 'warning',
-													confirmButtonColor: 'Yes',
-												}).then(async () => await deleteCategory(c.id))
-											}
+												}).then(async (result) => result.isConfirmed && (await deleteCategory(c.id)));
+											}}
 										/>
 									</ActionIcon>
 								</Table.Td>

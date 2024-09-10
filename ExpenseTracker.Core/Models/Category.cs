@@ -11,6 +11,10 @@ public class Category : IEntity
     public DateTimeOffset? UpdatedDateTime { get; private set; }
     public bool IsDeleted { get; private set; }
 
+    public double? CategoryIncome { get; private set; }
+
+    public double? CategoryOutcome { get; private set; }
+
     private Category()
     {
 

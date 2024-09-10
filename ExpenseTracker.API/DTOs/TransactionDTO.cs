@@ -1,5 +1,4 @@
 ﻿using ExpenseTracker.API.Common.Interfaces;
-using ExpenseTracker.Core.Common.Enums;
 using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.API.DTOs;
@@ -15,7 +14,8 @@ public class TransactionDTO : IEntityDTO
   public CategoryDTO? Category { get; set; }
   public DateTimeOffset? CreatedDateTime { get; set; }
   public DateTimeOffset? UpdatedDateTime { get; set; }
-
+  public string Currency { get; set; }
+  public double ExchangeRate { get; set; }
   public TransactionDTO()
   {
 
@@ -32,6 +32,8 @@ public class TransactionDTO : IEntityDTO
     CreatedDateTime = transaction.CreatedDateTime;
     UpdatedDateTime = transaction.UpdatedDateTime;
     Category = new CategoryDTO(transaction.Category, transaction.CategoryId);
+    Currency = transaction.Currency;
+    ExchangeRate = transaction.ExchangeRate;
   }
 
 }

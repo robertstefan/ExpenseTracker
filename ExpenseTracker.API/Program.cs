@@ -1,9 +1,12 @@
 using ExpenseTracker.API.Configuration;
+using ExpenseTracker.API.Tasks;
+using ExpenseTracker.Cache.Configuration;
 using ExpenseTracker.Core.Configuration;
 using ExpenseTracker.Data.Configuration;
+using ExpenseTracker.Messaging.Configuration;
 using Serilog;
 
-var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json").Build();
+var configuration = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: false, reloadOnChange: false).Build();
 
 Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(configuration).CreateLogger();
 
@@ -20,7 +23,11 @@ try
     builder.Services
     .AddData(builder.Configuration)
     .AddCore()
+    .AddCache(builder.Configuration)
+    .AddMessaging()
     .AddPresentation(builder.Configuration);
+
+    builder.Services.AddHostedService<MessageReceiverService>();
 
     var app = builder.Build();
 
@@ -34,7 +41,7 @@ try
 
     app.UseHttpsRedirection();
 
-    app.UseCors(x => x.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+    app.UseCors("WebPolicy");
 
     app.UseAuthentication();
 

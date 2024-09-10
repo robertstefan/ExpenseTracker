@@ -12,10 +12,14 @@ namespace ExpenseTracker.Core.Models
         public string LastName { get; private set; }
         public string FirstName { get; private set; }
 
+        public double MonthlyBudget { get; set; }
+
         public bool LockedOut { get; private set; }
         public short LoginTries { get; private set; }
 
         public bool IsDeleted { get; private set; }
+
+        public DayOfWeek FirstDayOfWeekPreference { get; private set; } = DayOfWeek.Monday;
 
         public DateTimeOffset? CreatedDateTime { get; private set; }
         public DateTimeOffset? UpdatedDateTime { get; private set; }

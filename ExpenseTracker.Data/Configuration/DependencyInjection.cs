@@ -6,6 +6,8 @@ using ExpenseTracker.Data.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using ExpenseTracker.Core.Interfaces.UserContracts;
+using ExpenseTracker.Data.Repositories.UserRepositories;
 
 namespace ExpenseTracker.Data.Configuration;
 
@@ -13,17 +15,31 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddData(this IServiceCollection services, ConfigurationManager configuration)
     {
+        var connString = configuration.GetConnectionString("DefaultConnection")!;
+
         services.AddScoped<ITransactionRepository, TransactionsRespository>(sp =>
-            new TransactionsRespository(configuration.GetConnectionString("DefaultConnection")!));
+            new TransactionsRespository(connString));
 
         services.AddScoped<ICategoriesRepository, CategoriesRepository>(sp =>
-            new CategoriesRepository(configuration.GetConnectionString("DefaultConnection")!));
+            new CategoriesRepository(connString));
 
-        services.AddScoped<IUserRepository, UserRepository>(sp =>
-        new UserRepository(configuration.GetConnectionString("DefaultConnection")!));
+        services.AddScoped<IUserAccountSettingsRepository, UserAccountSettingsRepository>(sp =>
+        new UserAccountSettingsRepository(connString));
+
+        services.AddScoped<IUserManagementRepository, UserManagementRepository>(sp =>
+        new UserManagementRepository(connString));
+
+        services.AddScoped<IUserSecurityRepository, UserSecurityRepository>(sp =>
+        new UserSecurityRepository(connString));
+
+        services.AddScoped<IUserTransactionsRepository, UserTransactionRepository>(sp =>
+        new UserTransactionRepository(connString));
 
         services.AddScoped<IActionCodeRepository, ActionCodeRepository>(sp =>
-        new ActionCodeRepository(configuration.GetConnectionString("DefaultConnection")!));
+        new ActionCodeRepository(connString));
+
+        services.AddScoped<IReportRepository, ReportRepository>(sp =>
+        new ReportRepository(connString));
 
         services.AddAuth(configuration);
 

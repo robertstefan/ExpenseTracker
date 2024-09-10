@@ -3,10 +3,8 @@ using ExpenseTracker.API.Common.Options;
 using ExpenseTracker.API.Common.Pagination;
 using ExpenseTracker.API.DTOs;
 using ExpenseTracker.API.Requests.Categories;
-using ExpenseTracker.Core.Common.Pagination;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Serilog;
@@ -14,7 +12,9 @@ using Serilog;
 namespace ExpenseTracker.API.Controllers;
 
 [Route("api/categories")]
-public class CategoriesController(CategoryService _categoryService, IOptions<SoftDeleteSettings> softDeleteSettings) : ApiController
+public class CategoriesController(
+    CategoryService _categoryService,
+    IOptions<SoftDeleteSettings> softDeleteSettings) : ApiController
 {
     private readonly SoftDeleteSettings _softDeleteSettings = softDeleteSettings.Value;
 

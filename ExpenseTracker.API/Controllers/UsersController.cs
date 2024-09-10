@@ -4,6 +4,7 @@ using ExpenseTracker.API.Common.Pagination;
 using ExpenseTracker.API.DTOs;
 using ExpenseTracker.API.Requests.Users;
 using ExpenseTracker.Core.Common.Enums;
+using ExpenseTracker.Core.Common.Pagination;
 using ExpenseTracker.Core.Models;
 using ExpenseTracker.Core.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -14,14 +15,22 @@ using UserModel = ExpenseTracker.Core.Models.User;
 namespace ExpenseTracker.API.Controllers;
 
 [Route("api/users")]
-public class UsersController(UserService _userService, ActionCodeService _actionCodeService, IOptions<SoftDeleteSettings> softDeleteSettings, ILogger<UsersController> _logger) : ApiController
+public class UsersController(
+    UserService _userService,
+    ActionCodeService _actionCodeService,
+    IOptions<SoftDeleteSettings> softDeleteSettings) : ApiController
 {
     private readonly SoftDeleteSettings _softDeleteSettings = softDeleteSettings.Value;
 
     [HttpGet("list")]
     public async Task<ActionResult<Paged<UserDTO>>> GetUsersPaginated([FromQuery] int PageNumber = 1, [FromQuery] int PageSize = 10)
     {
-        return Ok();
+        var users = await _userService.GetUsersPaginatedAsync(PageNumber, PageSize);
+
+        return new Paged<UserDTO>(users.TotalCount, PageNumber, PageSize)
+        {
+            Items = users.Rows.Select(user => new UserDTO(user))
+        };
     }
 
     [HttpGet("{id}")]
@@ -41,7 +50,7 @@ public class UsersController(UserService _userService, ActionCodeService _action
                 return NotFound("No users with the associated id were found.");
             }
 
-            return Ok(new UserDTO(user));
+            return Ok(user);
         }
         catch (Exception ex)
         {
@@ -50,6 +59,20 @@ public class UsersController(UserService _userService, ActionCodeService _action
             return BadRequest("The user could not be retrieved");
 
         }
+    }
+
+    [HttpGet("{id}/transactions")]
+    public async Task<ActionResult<Paged<TransactionDTO>>> GetUserTransactionAsync(
+        Guid id,
+        [FromQuery] int PageNumber = 1,
+        [FromQuery] int PageSize = 10)
+    {
+        PaginatedResponse<Transaction> transactions = await _userService.GetUserTransactionPaginatedAsync(id, PageNumber, PageSize);
+
+        return new Paged<TransactionDTO>(transactions.TotalCount, PageNumber, PageSize)
+        {
+            Items = transactions.Rows.Select(transaction => new TransactionDTO(transaction))
+        };
     }
 
     [HttpPost("update/{id}")]
@@ -175,4 +198,5 @@ public class UsersController(UserService _userService, ActionCodeService _action
         }
 
     }
+
 }

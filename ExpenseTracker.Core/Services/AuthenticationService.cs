@@ -1,15 +1,21 @@
 using ExpenseTracker.Core.Common.Authentication;
 using ExpenseTracker.Core.Common.Enums;
 using ExpenseTracker.Core.Interfaces;
+using ExpenseTracker.Core.Interfaces.UserContracts;
 using ExpenseTracker.Core.Models;
 
 namespace ExpenseTracker.Core.Services;
 
-public class AuthenticationService(IUserRepository _userRepository, IActionCodeRepository _actionCodeRepository, IJwtTokenGenerator _jwtTokenGenerator)
+public class AuthenticationService(
+    IUserSecurityRepository _userSecurityRepository,
+    IUserAccountSettingsRepository _userAccountSettingsRepository,
+    IUserManagementRepository _userManagementRepository,
+    IActionCodeRepository _actionCodeRepository,
+    IJwtTokenGenerator _jwtTokenGenerator)
 {
     public async Task<AuthenticationResponse?> LoginAsync(string email, string password)
     {
-        var user = await _userRepository.GetUserByEmailAsync(email);
+        var user = await _userManagementRepository.GetUserByEmailAsync(email);
 
         if (user is null)
         {
@@ -23,23 +29,23 @@ public class AuthenticationService(IUserRepository _userRepository, IActionCodeR
 
         if (user.PasswordHash != password)
         {
-            await _userRepository.IncrementFailedLoginAttemptsAsync(user.Id);
+            await _userSecurityRepository.IncrementFailedLoginAttemptsAsync(user.Id);
 
             if (user.LoginTries + 1 >= 3)
             {
-                await _userRepository.LockUserAsync(user.Id);
+                await _userSecurityRepository.LockUserAsync(user.Id);
             }
 
             return null;
         }
 
         var token = _jwtTokenGenerator.GenerateToken(user);
-        await _userRepository.ResetLoginAttemptsAsync(user.Id);
+        await _userSecurityRepository.ResetLoginAttemptsAsync(user.Id);
         return new AuthenticationResponse(user, token);
     }
     public async Task<AuthenticationResponse?> Register(User user)
     {
-        var createdUser = await _userRepository.AddUserAsync(user);
+        var createdUser = await _userManagementRepository.AddUserAsync(user);
 
         if (createdUser is null)
         {
@@ -59,7 +65,7 @@ public class AuthenticationService(IUserRepository _userRepository, IActionCodeR
             return false;
         }
 
-        var updatedPassword = await _userRepository.ResetPassword(UserId.Value, password);
+        var updatedPassword = await _userAccountSettingsRepository.ResetPasswordAsync(UserId.Value, password);
 
         return updatedPassword;
 
@@ -73,9 +79,13 @@ public class AuthenticationService(IUserRepository _userRepository, IActionCodeR
             return false;
         }
 
-        var updatedPassword = await _userRepository.ChangeEmail(UserId.Value, password);
+        var updatedPassword = await _userAccountSettingsRepository.ChangeEmailAsync(UserId.Value, password);
 
         return updatedPassword;
 
+    }
+    public async Task<bool> UnlockUserAsync(Guid id)
+    {
+        return await _userSecurityRepository.UnlockUserAsync(id);
     }
 }

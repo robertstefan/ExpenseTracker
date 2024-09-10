@@ -1,3 +1,4 @@
+using ExpenseTracker.Core.Interfaces;
 using ExpenseTracker.Core.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,9 +14,7 @@ public static class DependencyInjection
         services.AddScoped<UserService>();
         services.AddScoped<AuthenticationService>();
         services.AddScoped<ActionCodeService>();
-
+        services.AddScoped<RaportService>();
         return services;
     }
-
-
 }
